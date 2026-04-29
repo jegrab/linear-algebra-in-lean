@@ -1,0 +1,10 @@
+name = "linear-algebra-in-lean"
+version = "0.1.0"
+defaultTargets = ["linear-algebra-in-lean"]
+
+[[lean_lib]]
+name = "LinearAlgebraInLean"
+
+[[lean_exe]]
+name = "linear-algebra-in-lean"
+root = "Main"
