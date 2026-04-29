@@ -6,7 +6,9 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
   let h1 := Eq.comm.mp h1
   Eq.trans h1 h2
 
-class Group (G: Type) (op : G -> G -> G) where
+def operation (G: Type) := G -> G -> G
+
+class Group (G: Type) (op : operation G) where
   neg : G -> G
   neutral : G
   type : Type := G
@@ -20,7 +22,12 @@ class Group (G: Type) (op : G -> G -> G) where
 
   unique_neutral (ha : neutral_pred op a) : a = neutral := unique_neutral ha neutral_law
 
-instance : Group Int Int.add where
+  nonzeros:= {x : G // x ≠ neutral}
+
+class AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
+  commutative_law : ∀ a b : G, op a b = op b a
+
+instance : AbelianGroup Int Int.add where
   neg := Int.neg
   neutral := 0
   assoc := Int.add_assoc
@@ -35,6 +42,22 @@ instance : Group Int Int.add where
     simp at h
     rw [Int.add_comm] at h
     exact h
+  commutative_law := Int.add_comm
+
+instance : AbelianGroup Rat Rat.add where
+  neg := Rat.neg
+  neutral := 0
+  assoc := Rat.add_assoc
+  neutral_left := Rat.zero_add
+  neutral_right := Rat.add_zero
+  inverse_law_left := Rat.add_neg_cancel
+  inverse_law_right := fun a => by
+    have h := Rat.add_neg_cancel a
+    rw [Rat.add_comm] at h
+    exact h
+  commutative_law := Rat.add_comm
+
+-- instance [ag: AbelianGroup Rat Rat.add] : AbelianGroup ag.nonzeros
 
 example [G: Group G op] : op (G.neutral) (G.neutral) = G.neutral := by
   apply Group.neutral_left
