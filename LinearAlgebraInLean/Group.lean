@@ -22,7 +22,7 @@ structure Group (G: Type) (op : operation G) where
 
   unique_neutral (ha : neutral_pred op a) : a = neutral := unique_neutral ha neutral_law
 
-  nonzeros:= {x : G // x ≠ neutral}
+def nonzeros (g : Group G op):= {x : G // x ≠ g.neutral}
 
 structure AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
   commutative_law : ∀ a b : G, op a b = op b a
