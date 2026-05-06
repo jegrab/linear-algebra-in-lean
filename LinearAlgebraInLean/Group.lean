@@ -88,32 +88,23 @@ theorem ret_non_zero_mul_is_mul (a b : Rat) (ha: a ≠ 0) (hb : b ≠ 0) : (⟨ 
   simp [rat_mul_non_zero, closed_nonzero]
   rfl
 
-theorem inv_not_zero (x : Rat) (h : x ≠ 0) : Rat.inv x ≠ 0 := by
-  let r := Rat.inv x
-  by_cases hx : x >= 0
-  by_cases hx : x = 0
-  contradiction
-  have hx : x > 0 := by grind
-  have hr : r > 0 := by
-    apply Rat.inv_pos.mpr
+theorem rat_inv_injective: Function.Injective Rat.inv := by
+    unfold Function.Injective
+    intro a b
+    intro h
+    rw [<-Rat.inv_inv a, <- Rat.inv_inv b]
+    simp [Inv.inv]
+    apply congrArg Rat.inv
     assumption
-  have hr : r ≠ 0 := by
-    intro heq
-    have : (0: Rat) > 0 := by
-      rw [heq] at hr
-      assumption
-    contradiction
-  exact hr
-  have hx : x < 0 := by grind
-  have hr : r < 0 := by
-    sorry
-  have hr : r ≠ 0 := by
-    intro heq
-    have : (0: Rat) > 0 := by
-      rw [heq] at hr
-      assumption
-    contradiction
-  exact hr
+
+theorem inv_not_zero (x : Rat) (h : x ≠ 0) : x.inv ≠ 0 := by
+  apply rat_inv_injective.ne_iff.mp
+  have : ∀ x:Rat, x.inv.inv = x := Rat.inv_inv
+  rw [this]
+  have : (0:Rat).inv = 0 := Rat.inv_zero
+  rw [this]
+  assumption
+
 
 def rat_inv_non_zero (x: nonzero_rat) : nonzero_rat := by
   let ⟨x, h⟩ := x
