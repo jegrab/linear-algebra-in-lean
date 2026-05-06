@@ -8,7 +8,7 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
 
 def operation (G: Type) := G -> G -> G
 
-class Group (G: Type) (op : operation G) where
+structure Group (G: Type) (op : operation G) where
   neg : G -> G
   neutral : G
   type : Type := G
@@ -24,10 +24,10 @@ class Group (G: Type) (op : operation G) where
 
   nonzeros:= {x : G // x ≠ neutral}
 
-class AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
+structure AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
   commutative_law : ∀ a b : G, op a b = op b a
 
-instance : AbelianGroup Int Int.add where
+def IntGroup : AbelianGroup Int Int.add := {
   neg := Int.neg
   neutral := 0
   assoc := Int.add_assoc
@@ -43,8 +43,9 @@ instance : AbelianGroup Int Int.add where
     rw [Int.add_comm] at h
     exact h
   commutative_law := Int.add_comm
+}
 
-instance : AbelianGroup Rat Rat.add where
+instance RatAddGroup : AbelianGroup Rat Rat.add where
   neg := Rat.neg
   neutral := 0
   assoc := Rat.add_assoc
@@ -57,7 +58,102 @@ instance : AbelianGroup Rat Rat.add where
     exact h
   commutative_law := Rat.add_comm
 
+#check Rat.mul_eq_zero.mp
+
+abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
+
+def closed_nonzero {S: Type} {z: S} (op: operation S) (h: zero_devisor_free op z) : operation {x: S // x ≠ z} :=
+  fun a b =>
+    have hnz: op a b ≠ z := by
+      simp [zero_devisor_free] at *
+      have ha: a ≠ z := a.property
+      have hb: b ≠ z := b.property
+      have hab: ¬ (a = z ∨ b = z) := by
+        intro a
+        have := a.imp ha hb
+        simp at *
+      exact hab.imp ((h a b).mpr)
+    ⟨op a b, hnz⟩
+
+def x : ∀ a b : Rat,  a = 0 ∨ b = 0 ↔ a * b = 0 := fun a b => (@Rat.mul_eq_zero a b).symm
+
+-- set_option pp.all true
+def rat_mul_non_zero := closed_nonzero Rat.mul x
+
+def nonzero_rat := { x : Rat // x ≠ 0}
+instance : Mul nonzero_rat where
+  mul := rat_mul_non_zero
+
+theorem ret_non_zero_mul_is_mul (a b : Rat) (ha: a ≠ 0) (hb : b ≠ 0) : (⟨ a * b, (rat_mul_non_zero ⟨a, ha ⟩  ⟨b,hb⟩).property⟩: nonzero_rat)  = (rat_mul_non_zero ⟨a, ha⟩ ⟨b, hb⟩) := by
+  simp [rat_mul_non_zero, closed_nonzero]
+  rfl
+
+theorem inv_not_zero (x : Rat) (h : x ≠ 0) : Rat.inv x ≠ 0 := by
+  let r := Rat.inv x
+  by_cases hx : x >= 0
+  by_cases hx : x = 0
+  contradiction
+  have hx : x > 0 := by grind
+  have hr : r > 0 := by
+    apply Rat.inv_pos.mpr
+    assumption
+  have hr : r ≠ 0 := by
+    intro heq
+    have : (0: Rat) > 0 := by
+      rw [heq] at hr
+      assumption
+    contradiction
+  exact hr
+  have hx : x < 0 := by grind
+  have hr : r < 0 := by
+    sorry
+  have hr : r ≠ 0 := by
+    intro heq
+    have : (0: Rat) > 0 := by
+      rw [heq] at hr
+      assumption
+    contradiction
+  exact hr
+
+def rat_inv_non_zero (x: nonzero_rat) : nonzero_rat := by
+  let ⟨x, h⟩ := x
+  let r := Rat.inv x
+  exact ⟨r, inv_not_zero x h⟩
+
+variable (a : Rat) (ha: a ≠ 0)
+#check (rat_inv_non_zero ⟨a, ha ⟩).property
+
+theorem rat_non_zero_inv_is_inv (a : Rat) (ha: a ≠ 0) : (⟨ Rat.inv a, inv_not_zero a ha ⟩: nonzero_rat)  = (rat_inv_non_zero ⟨a, ha⟩) := by
+  simp [rat_inv_non_zero, inv_not_zero]
+
+instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} rat_mul_non_zero where
+  neg := rat_inv_non_zero
+  neutral := ⟨1, by simp⟩
+  assoc := by
+    intro ⟨a, ha⟩  ⟨ b, hb⟩  ⟨ c, hc⟩
+    simp [<-ret_non_zero_mul_is_mul, Rat.mul_assoc]
+  neutral_left := by
+    intro ⟨a, ha⟩
+    simp [<-ret_non_zero_mul_is_mul, Rat.one_mul]
+  neutral_right := by
+    intro ⟨a, ha⟩
+    simp [<-ret_non_zero_mul_is_mul, Rat.mul_one]
+  inverse_law_left := by
+    intro ⟨a, ha⟩
+    simp [<-ret_non_zero_mul_is_mul, <-rat_non_zero_inv_is_inv]
+    apply Rat.mul_inv_cancel
+    assumption
+  inverse_law_right := by
+    intro ⟨a, ha⟩
+    simp [<-ret_non_zero_mul_is_mul, <-rat_non_zero_inv_is_inv]
+    apply Rat.inv_mul_cancel
+    assumption
+  commutative_law := by
+    intro ⟨a, ha⟩ ⟨b, hb⟩
+    simp [<-ret_non_zero_mul_is_mul]
+    apply Rat.mul_comm
+
 -- instance [ag: AbelianGroup Rat Rat.add] : AbelianGroup ag.nonzeros
 
-example [G: Group G op] : op (G.neutral) (G.neutral) = G.neutral := by
+example (G: Group G op) : op (G.neutral) (G.neutral) = G.neutral := by
   apply Group.neutral_left
