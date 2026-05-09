@@ -20,27 +20,3 @@ instance [DecidableEq R] (f : Field R) : Add R where
 
 instance [DecidableEq R] (f : Field R) : Mul R where
   mul := f.mul
-
-
-instance RatField: Field Rat where
-  add := Rat.add
-  addStructure := RatAddGroup
-  mul := (· * ·)
-  mul_closed_zero := by
-    intro a b ha hb
-    have hx := (@Rat.mul_eq_zero a b).mp
-    rw [<-Decidable.not_imp_not, <-@Classical.not_not (a = 0), <-@Classical.not_not (b = 0), <-Classical.not_and_iff_not_or_not, Classical.not_not] at hx
-    apply hx
-    apply And.intro <;> assumption
-
-  mul_eq_mul' := by
-    intro a b ha hb
-    simp [rat_mul_non_zero, closed_nonzero]
-    rfl
-
-
-  mulStructure := RatMulGroup
-  distributivity := by
-    intro a b c
-    change a * (b+c) = a * b + a * c
-    apply Rat.mul_add
