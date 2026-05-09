@@ -10,7 +10,7 @@ class Field (R : Type) [DecidableEq R] where
   mul_closed_zero: ∀ x y: R, (hx: x ≠ zero) -> (hy: y ≠ zero) -> mul x y ≠ zero
   _mul' : operation (nonzeros addStructure.toGroup) := fun a b => ⟨ mul a b, by grind⟩
   mul_eq_mul': ∀x y: R, (hx: x ≠ zero) ->  (hy: y ≠ zero) ->
-    (_mul' ⟨x, by grind⟩ ⟨ y, by grind⟩).val = mul x y
+    (_mul' ⟨x, by grind⟩ ⟨y, by grind⟩).val = mul x y
 
   mulStructure : AbelianGroup (nonzeros addStructure.toGroup) _mul'
   distributivity : ∀ a b c : R , mul a (add b c) = add (mul a b) (mul a c)
