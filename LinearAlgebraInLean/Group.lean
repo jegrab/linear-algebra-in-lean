@@ -1,5 +1,7 @@
 import LinearAlgebraInLean.Infix
 
+namespace Group
+
 def neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
 
 theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b :=
@@ -49,22 +51,20 @@ open Lean.TSyntax.Compat in
 macro "∃!" v:ident " : " t:term ", " b:term : term =>
   `(@existsUnique $t (fun $v => $b))
 
-theorem mulWithInversesRight (g: Group G op) {a b : G}  : ∃! x : G, op a x = b :=
-  by
-  let x := op (g.neg a) b
-  have h: op a x = b := by
-    calc
-      op a x = a §op§ ((g.neg a) §op§ b)  := by rfl
-           _ = (a §op§ (g.neg a)) §op§ b  := by simp [g.assoc]
-           _ = g.neutral §op§ b           := by simp [g.inverse_law_left]
-           _ = b                          := by simp [g.neutral_left]
-  have u : ∀ y : G, op a y = b -> x = y := by
-    intro y
-    intro h1
-    have h2 : a §op§ x = a §op§ y                                   := by simp [h1,h]
-    have h2 : (g.neg a) §op§ (a §op§ x) = (g.neg a) §op§ (a §op§ y) := by simp [h2]
-    have h2 : ((g.neg a) §op§ a) §op§ x = ((g.neg a) §op§ a) §op§ y := by simp [h2, g.assoc]
-    have h2 : g.neutral §op§ x = g.neutral §op§ y                   := by rw [<-g.inverse_law_right a, h2]
-    have h2 : x = y                                                 := by rw [<-g.neutral_left x, <-g.neutral_left y, h2]
-    exact h2
-  exact ⟨x,⟨h,u⟩⟩
+theorem mulWithInversesRight (g: Group G op) {a b : G}  : ∃! x : G, op a x = b := by
+  unfold existsUnique
+  exists (g.neg a) §op§ b
+  simp
+  apply And.intro
+  simp [<-g.assoc, g.inverse_law_left, g.neutral_left]
+  intro c hc
+  simp [<-hc, <-g.assoc, g.inverse_law_right, g.neutral_left]
+
+theorem mulWithInversesLeft (g: Group G op) {a b : G}  : ∃! x : G, op x a = b := by
+  unfold existsUnique
+  exists b §op§ (g.neg a)
+  simp
+  apply And.intro
+  simp [g.assoc, g.inverse_law_right, g.neutral_right]
+  intro c hc
+  simp [<-hc, g.assoc, g.inverse_law_left, g.neutral_right]
