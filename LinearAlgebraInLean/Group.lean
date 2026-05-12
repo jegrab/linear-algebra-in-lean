@@ -1,3 +1,5 @@
+namespace LinAlg
+
 def neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
 
 theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b :=
@@ -41,3 +43,5 @@ def closed_nonzero {S: Type} {z: S} (op: operation S) (h: zero_devisor_free op z
         simp at *
       exact hab.imp ((h a b).mpr)
     ⟨op a b, hnz⟩
+
+end LinAlg

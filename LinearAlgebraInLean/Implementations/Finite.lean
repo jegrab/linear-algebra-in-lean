@@ -1,17 +1,45 @@
 
 import LinearAlgebraInLean.Group
+import Mathlib.Data.Nat.Prime.Defs
+
+open LinAlg
 
 def Range (n: {n // n > 0}) := {x : Nat // x <n}
+def RangeNonzero (n: {n // n > 0}) := {x : Nat // 0 < x ∧ x < n}
 
 instance : Add (Range n) where
   add := fun ⟨a, _⟩ ⟨b, _ ⟩ =>
-  let thm: (a + b) % n < n := by
+  have thm: (a + b) % n < n := by
     generalize a + b = x
     have := n.property
     rw [gt_iff_lt] at this
     apply Nat.mod_lt
     assumption
     ⟨(a + b) % n, thm⟩
+
+instance (h: Nat.Prime n.val) :  Mul (RangeNonzero n) where
+  mul := fun ⟨a, _⟩ ⟨ b, _⟩ =>
+  have h₁: a * b % n.val > 0 := by
+    by_contra hn
+    simp [] at hn
+    have :=Nat.dvd_of_mod_eq_zero hn
+    have := (Prime.dvd_mul h.prime).mp this
+    cases this
+    . rename_i hha _ ha
+      simp [Dvd.dvd] at ha
+      have ⟨c, hc⟩ := ha
+      rw [hc] at hha
+      cases hha
+      rename_i f g
+      nth_rewrite 2 [<-Nat.mul_one n] at g
+      rw [Nat.mul_lt_mul_left n.prop] at g
+      have := Nat.ne_zero_of_mul_ne_zero_right (Nat.ne_of_gt f)
+      have := Nat.zero_lt_of_ne_zero this
+      cases c <;> contradiction
+    . 
+
+  have h₂ := sorry
+  ⟨a * b % n, h₁ ∧ h₂⟩
 
 instance CyclicGroup (n) : AbelianGroup (Range n) Add.add where
   assoc := by
@@ -58,3 +86,6 @@ instance CyclicGroup (n) : AbelianGroup (Range n) Add.add where
     intro h
     have := Nat.not_le_of_gt ah
     contradiction
+
+-- todo restrict on primes
+instance CyclicMultGroup (n : {n: Nat //  n}): AbelianGroup (RangeNonzero n) where
