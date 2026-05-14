@@ -1,4 +1,6 @@
-namespace LinAlg
+import LinearAlgebraInLean.Infix
+
+namespace Group
 
 def neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
 
@@ -44,4 +46,25 @@ def closed_nonzero {S: Type} {z: S} (op: operation S) (h: zero_devisor_free op z
       exact hab.imp ((h a b).mpr)
     ⟨op a b, hnz⟩
 
-end LinAlg
+def existsUnique (p: T -> Prop) := ∃ x : T, (p x ∧ ∀ y : T, p y -> x = y)
+open Lean.TSyntax.Compat in
+macro "∃!" v:ident " : " t:term ", " b:term : term =>
+  `(@existsUnique $t (fun $v => $b))
+
+theorem mulWithInversesRight (g: Group G op) {a b : G}  : ∃! x : G, op a x = b := by
+  unfold existsUnique
+  exists (g.neg a) §op§ b
+  simp
+  apply And.intro
+  simp [<-g.assoc, g.inverse_law_left, g.neutral_left]
+  intro c hc
+  simp [<-hc, <-g.assoc, g.inverse_law_right, g.neutral_left]
+
+theorem mulWithInversesLeft (g: Group G op) {a b : G}  : ∃! x : G, op x a = b := by
+  unfold existsUnique
+  exists b §op§ (g.neg a)
+  simp
+  apply And.intro
+  simp [g.assoc, g.inverse_law_right, g.neutral_right]
+  intro c hc
+  simp [<-hc, g.assoc, g.inverse_law_left, g.neutral_right]

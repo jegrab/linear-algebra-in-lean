@@ -4,8 +4,9 @@ import Mathlib.Data.Nat.Prime.Defs
 
 open LinAlg
 
-def Range (n: {n // n > 0}) := {x : Nat // x <n}
-def RangeNonzero (n: {n // n > 0}) := {x : Nat // 0 < x ∧ x < n}
+abbrev NatPos := {n: Nat // n > 0}
+def Range (n: NatPos) := {x : Nat // x <n}
+def RangeNonzero (n: NatPos) := {x : Nat // 0 < x ∧ x < n}
 
 instance : Add (Range n) where
   add := fun ⟨a, _⟩ ⟨b, _ ⟩ =>
@@ -17,29 +18,29 @@ instance : Add (Range n) where
     assumption
     ⟨(a + b) % n, thm⟩
 
-instance (h: Nat.Prime n.val) :  Mul (RangeNonzero n) where
-  mul := fun ⟨a, _⟩ ⟨ b, _⟩ =>
-  have h₁: a * b % n.val > 0 := by
-    by_contra hn
-    simp [] at hn
-    have :=Nat.dvd_of_mod_eq_zero hn
-    have := (Prime.dvd_mul h.prime).mp this
-    cases this
-    . rename_i hha _ ha
-      simp [Dvd.dvd] at ha
-      have ⟨c, hc⟩ := ha
-      rw [hc] at hha
-      cases hha
-      rename_i f g
-      nth_rewrite 2 [<-Nat.mul_one n] at g
-      rw [Nat.mul_lt_mul_left n.prop] at g
-      have := Nat.ne_zero_of_mul_ne_zero_right (Nat.ne_of_gt f)
-      have := Nat.zero_lt_of_ne_zero this
-      cases c <;> contradiction
-    . 
+instance foo {n: NatPos} (h: Nat.Prime n.val) :  Mul (RangeNonzero n) where
+  mul := fun ⟨a, ha⟩ ⟨ b, hb⟩ => by
+    exists (a * b) % n
+    apply And.intro
+    case right => simp [Nat.mod_lt _ n.property]
+    suffices ¬ ↑n ∣ a * b by
+     by_contra
+     simp at this
+     have := Nat.dvd_of_mod_eq_zero this
+     contradiction
+    have na :¬ ↑n ∣ a := by
+      apply @Nat.not_dvd_of_lt_of_lt_mul_succ _ 0 <;> simp
+      exact ha.left
+      exact ha.right
+    have nb :¬ ↑n ∣ b := by
+      apply @Nat.not_dvd_of_lt_of_lt_mul_succ _ 0 <;> simp
+      exact hb.left
+      exact hb.right
+    apply (Nat.Prime.dvd_mul h).not.mpr
+    intro x
+    cases x <;> contradiction
 
-  have h₂ := sorry
-  ⟨a * b % n, h₁ ∧ h₂⟩
+
 
 instance CyclicGroup (n) : AbelianGroup (Range n) Add.add where
   assoc := by
@@ -88,4 +89,15 @@ instance CyclicGroup (n) : AbelianGroup (Range n) Add.add where
     contradiction
 
 -- todo restrict on primes
-instance CyclicMultGroup (n : {n: Nat //  n}): AbelianGroup (RangeNonzero n) where
+instance CyclicMultGroup (n: NatPos) (h: Nat.Prime n.val) [m: Mul (RangeNonzero n)]: AbelianGroup (RangeNonzero n) m.mul where
+  neutral := by
+    exists 1
+    have := h.ne_one
+    simp
+  neg := fun ⟨x, hx⟩ => by
+    exists n-x
+    constructor
+    apply (Nat.le_sub_iff_add_le (hx.right.le)).mpr
+    grind
+    grind
+     -- todo
