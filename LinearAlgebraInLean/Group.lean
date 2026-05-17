@@ -1,3 +1,7 @@
+import LinearAlgebraInLean.Infix
+
+namespace Group
+
 def neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
 
 theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b :=
@@ -8,7 +12,7 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
 
 def operation (G: Type) := G -> G -> G
 
-class Group (G: Type) (op : operation G) where
+class Group (G: Type) (op : outParam (operation G)) where
   neg : G -> G
   neutral : G
   type : Type := G
@@ -22,42 +26,57 @@ class Group (G: Type) (op : operation G) where
 
   unique_neutral (ha : neutral_pred op a) : a = neutral := unique_neutral ha neutral_law
 
-  nonzeros:= {x : G // x ≠ neutral}
+abbrev groupOperation [Group G op] := op
+
+infixl:20 " ▵ " => groupOperation
+
+instance : CoeSort (Group G op) (Type) where
+  coe _ := G
+
+
+abbrev nonzeros (g : Group G op):= {x : G // x ≠ g.neutral}
+
 
 class AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
   commutative_law : ∀ a b : G, op a b = op b a
 
-instance : AbelianGroup Int Int.add where
-  neg := Int.neg
-  neutral := 0
-  assoc := Int.add_assoc
-  neutral_left := Int.zero_add
-  neutral_right := Int.add_zero
-  inverse_law_left := fun  a => by
-    have h := Int.add_neg_cancel_left a 0
-    simp at h
-    exact h
-  inverse_law_right := fun a => by
-    have h := Int.add_neg_cancel_left a 0
-    simp at h
-    rw [Int.add_comm] at h
-    exact h
-  commutative_law := Int.add_comm
+instance : CoeSort (AbelianGroup G op) (Type) where
+  coe _ := G
 
-instance : AbelianGroup Rat Rat.add where
-  neg := Rat.neg
-  neutral := 0
-  assoc := Rat.add_assoc
-  neutral_left := Rat.zero_add
-  neutral_right := Rat.add_zero
-  inverse_law_left := Rat.add_neg_cancel
-  inverse_law_right := fun a => by
-    have h := Rat.add_neg_cancel a
-    rw [Rat.add_comm] at h
-    exact h
-  commutative_law := Rat.add_comm
+abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
 
--- instance [ag: AbelianGroup Rat Rat.add] : AbelianGroup ag.nonzeros
+def closed_nonzero {S: Type} {z: S} (op: operation S) (h: zero_devisor_free op z) : operation {x: S // x ≠ z} :=
+  fun a b =>
+    have hnz: op a b ≠ z := by
+      simp [zero_devisor_free] at *
+      have ha: a ≠ z := a.property
+      have hb: b ≠ z := b.property
+      have hab: ¬ (a = z ∨ b = z) := by
+        intro a
+        have := a.imp ha hb
+        simp at *
+      exact hab.imp ((h a b).mpr)
+    ⟨op a b, hnz⟩
 
-example [G: Group G op] : op (G.neutral) (G.neutral) = G.neutral := by
-  apply Group.neutral_left
+def existsUnique (p: T -> Prop) := ∃ x : T, (p x ∧ ∀ y : T, p y -> x = y)
+open Lean.TSyntax.Compat in
+macro "∃!" v:ident " : " t:term ", " b:term : term =>
+  `(@existsUnique $t (fun $v => $b))
+
+theorem mulWithInversesRight (g: Group G op) {a b : G}  : ∃! x : G, op a x = b := by
+  unfold existsUnique
+  exists (g.neg a) §op§ b
+  simp
+  apply And.intro
+  simp [<-g.assoc, g.inverse_law_left, g.neutral_left]
+  intro c hc
+  simp [<-hc, <-g.assoc, g.inverse_law_right, g.neutral_left]
+
+theorem mulWithInversesLeft (g: Group G op) {a b : G}  : ∃! x : G, op x a = b := by
+  unfold existsUnique
+  exists b §op§ (g.neg a)
+  simp
+  apply And.intro
+  simp [g.assoc, g.inverse_law_right, g.neutral_right]
+  intro c hc
+  simp [<-hc, g.assoc, g.inverse_law_left, g.neutral_right]
