@@ -1,8 +1,9 @@
 
 import LinearAlgebraInLean.Group
 import Mathlib.Data.Nat.Prime.Defs
+import Mathlib.Data.Int.GCD
 
-open LinAlg
+open Group
 
 abbrev NatPos := {n: Nat // n > 0}
 def Range (n: NatPos) := {x : Nat // x <n}
@@ -18,8 +19,8 @@ instance : Add (Range n) where
     assumption
     ⟨(a + b) % n, thm⟩
 
-instance foo {n: NatPos} (h: Nat.Prime n.val) :  Mul (RangeNonzero n) where
-  mul := fun ⟨a, ha⟩ ⟨ b, hb⟩ => by
+def mul {n: NatPos} (h: Nat.Prime n.val): operation (RangeNonzero n)  :=
+  fun ⟨a, ha⟩ ⟨ b, hb⟩ => by
     exists (a * b) % n
     apply And.intro
     case right => simp [Nat.mod_lt _ n.property]
@@ -39,6 +40,9 @@ instance foo {n: NatPos} (h: Nat.Prime n.val) :  Mul (RangeNonzero n) where
     apply (Nat.Prime.dvd_mul h).not.mpr
     intro x
     cases x <;> contradiction
+
+instance FiniteMul {n: NatPos} (h: Nat.Prime n.val) :  Mul (RangeNonzero n) where
+  mul := mul h
 
 
 
@@ -89,15 +93,43 @@ instance CyclicGroup (n) : AbelianGroup (Range n) Add.add where
     contradiction
 
 -- todo restrict on primes
-instance CyclicMultGroup (n: NatPos) (h: Nat.Prime n.val) [m: Mul (RangeNonzero n)]: AbelianGroup (RangeNonzero n) m.mul where
+instance CyclicMultGroup (n: NatPos) (h: Nat.Prime n.val): AbelianGroup (RangeNonzero n) (FiniteMul h).mul where
   neutral := by
     exists 1
     have := h.ne_one
-    simp
+    lia
   neg := fun ⟨x, hx⟩ => by
-    exists n-x
+    exists (Nat.gcdA x n % n).toNat
     constructor
-    apply (Nat.le_sub_iff_add_le (hx.right.le)).mpr
-    grind
-    grind
-     -- todo
+    suffices x.gcdA n % n ≠ 0 by
+      have : x.gcdA n % n ≥ 0 := by
+        have : (n: Int) ≠ 0 := by lia
+        simp [@Int.emod_nonneg (x.gcdA n) n this]
+      lia
+    intro ha
+    have := Int.dvd_of_emod_eq_zero ha
+
+    --have := Nat.exists_mul_mod_eq_one_of_coprime -- todo
+    have := Nat.gcd_eq_right_iff_dvd
+
+
+    have := Nat.gcd_eq_gcd_ab x n
+    have : x * (x.gcdA n) = (x.gcd n) - n * x.gcdB n := by lia
+
+
+
+
+  commutative_law := by
+    intro ⟨a, _, _⟩  ⟨b, _, _⟩
+    simp [Mul.mul, mul]
+    congr 2
+    simp [Nat.mul_comm]
+  assoc := by
+    intro ⟨a, _⟩ ⟨b, _⟩ ⟨c, _⟩
+    simp [Mul.mul, mul]
+    congr 2
+    simp [Nat.mul_assoc]
+  inverse_law_left := by
+    intro ⟨a, _⟩
+    simp [Mul.mul, mul]
+    congr
