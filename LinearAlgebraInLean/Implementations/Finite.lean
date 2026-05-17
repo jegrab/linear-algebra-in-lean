@@ -1,6 +1,8 @@
 
 import LinearAlgebraInLean.Group
 
+open Group
+
 def Range (n: {n // n > 0}) := {x : Nat // x <n}
 
 instance : Add (Range n) where

@@ -1,5 +1,6 @@
 import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
+open Group
 
 instance RatAddGroup : AbelianGroup Rat Rat.add where
   neg := Rat.neg
@@ -84,12 +85,10 @@ instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} rat_mul_non_zero where
     simp [<-ret_non_zero_mul_is_mul]
     apply Rat.mul_comm
 
--- instance [ag: AbelianGroup Rat Rat.add] : AbelianGroup ag.nonzeros
-
 example (G: Group G op) : op (G.neutral) (G.neutral) = G.neutral := by
   apply Group.neutral_left
 
-instance RatField: Field Rat where
+instance ℚ: Field Rat where
   add := Rat.add
   addStructure := RatAddGroup
   mul := (· * ·)

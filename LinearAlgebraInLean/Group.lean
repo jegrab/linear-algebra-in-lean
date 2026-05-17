@@ -12,7 +12,7 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
 
 def operation (G: Type) := G -> G -> G
 
-structure Group (G: Type) (op : operation G) where
+class Group (G: Type) (op : outParam (operation G)) where
   neg : G -> G
   neutral : G
   type : Type := G
@@ -26,10 +26,22 @@ structure Group (G: Type) (op : operation G) where
 
   unique_neutral (ha : neutral_pred op a) : a = neutral := unique_neutral ha neutral_law
 
+abbrev groupOperation [Group G op] := op
+
+infixl:20 " ▵ " => groupOperation
+
+instance : CoeSort (Group G op) (Type) where
+  coe _ := G
+
+
 abbrev nonzeros (g : Group G op):= {x : G // x ≠ g.neutral}
 
-structure AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
+
+class AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
   commutative_law : ∀ a b : G, op a b = op b a
+
+instance : CoeSort (AbelianGroup G op) (Type) where
+  coe _ := G
 
 abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
 

@@ -1,6 +1,6 @@
 import LinearAlgebraInLean.Group
 
-def IntGroup : AbelianGroup Int Int.add := {
+instance IntGroup : Group.AbelianGroup Int Int.add := {
   neg := Int.neg
   neutral := 0
   assoc := Int.add_assoc
@@ -17,3 +17,7 @@ def IntGroup : AbelianGroup Int Int.add := {
     exact h
   commutative_law := Int.add_comm
 }
+
+-- set_option trace.Meta.synthInstance true
+#eval (1: Int) ▵ 2
+#eval (1: IntGroup) ▵ -2

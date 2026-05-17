@@ -1,7 +1,8 @@
 import LinearAlgebraInLean.Group
 
+open Group
 
-class Field (R : Type) [DecidableEq R] where
+class Field (R : Type) where
   add : operation R
   addStructure : AbelianGroup R add
   zero := addStructure.neutral
@@ -13,10 +14,21 @@ class Field (R : Type) [DecidableEq R] where
     (_mul' ⟨x, by grind⟩ ⟨y, by grind⟩).val = mul x y
 
   mulStructure : AbelianGroup (nonzeros addStructure.toGroup) _mul'
+  one := mulStructure.neutral
+  _one_is_mulStructure_neutral : one = mulStructure.neutral := by simp
   distributivity : ∀ a b c : R , mul a (add b c) = add (mul a b) (mul a c)
 
-instance [DecidableEq R] (f : Field R) : Add R where
+instance [f : Field R] : Add R where
   add := f.add
 
-instance [DecidableEq R] (f : Field R) : Mul R where
+instance  [f : Field R] : Mul R where
   mul := f.mul
+
+instance [f: Field R]: OfNat (R) (nat_lit 0) where
+  ofNat := f.zero
+
+instance [f: Field R]: OfNat (R) (nat_lit 1) where
+  ofNat := f.one
+
+instance : CoeSort (Field R) Type where
+  coe _ := R
