@@ -2,9 +2,10 @@ import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
 open Group
 
-instance RatAddGroup : AbelianGroup Rat Rat.add where
-  neg := Rat.neg
-  neutral := 0
+instance RatAddGroup : AbelianGroup Rat where
+  op := Rat.add
+  default := 0
+  inv := Rat.neg
   assoc := Rat.add_assoc
   neutral_left := Rat.zero_add
   neutral_right := Rat.add_zero
@@ -58,9 +59,10 @@ variable (a : Rat) (ha: a ≠ 0)
 theorem rat_non_zero_inv_is_inv (a : Rat) (ha: a ≠ 0) : (⟨ Rat.inv a, inv_not_zero a ha ⟩: nonzero_rat)  = (rat_inv_non_zero ⟨a, ha⟩) := by
   simp [rat_inv_non_zero]
 
-instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} rat_mul_non_zero where
-  neg := rat_inv_non_zero
-  neutral := ⟨1, by simp⟩
+instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} where
+  op := rat_mul_non_zero
+  inv := rat_inv_non_zero
+  default := ⟨1, by simp⟩
   assoc := by
     intro ⟨a, ha⟩  ⟨ b, hb⟩  ⟨ c, hc⟩
     simp [<-ret_non_zero_mul_is_mul, Rat.mul_assoc]
@@ -85,7 +87,7 @@ instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} rat_mul_non_zero where
     simp [<-ret_non_zero_mul_is_mul]
     apply Rat.mul_comm
 
-example (G: Group G op) : op (G.neutral) (G.neutral) = G.neutral := by
+example (G: Group G) :  (𝟙: G) ◾ 𝟙 = 𝟙 := by
   apply Group.neutral_left
 
 instance ℚ: Field Rat where
@@ -101,12 +103,14 @@ instance ℚ: Field Rat where
 
   mul_eq_mul' := by
     intro a b ha hb
-    simp [rat_mul_non_zero, closed_nonzero]
-    rfl
-
+    congr
 
   mulStructure := RatMulGroup
   distributivity := by
     intro a b c
     change a * (b+c) = a * b + a * c
     apply Rat.mul_add
+
+example : (0: ℚ) = (𝟙: ℚ) := by
+
+  simp [Inhabited.default]

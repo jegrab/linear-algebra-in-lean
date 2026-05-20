@@ -1,8 +1,6 @@
 import LinearAlgebraInLean.Infix
 
-namespace Group
-
-def neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
+abbrev neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
 
 theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b :=
   let ⟨h1,_⟩ := hb a
@@ -10,37 +8,39 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
   let h1 := Eq.comm.mp h1
   Eq.trans h1 h2
 
-def operation (G: Type) := G -> G -> G
+abbrev operation (G: Type): Type:= G -> G -> G
 
-class Group (G: Type) (op : outParam (operation G)) where
-  neg : G -> G
-  neutral : G
-  type : Type := G
-  assoc : ∀ a b c : G , op (op a b) c = op a (op b c)
+class Operation (G: Type) where
+  op:  operation G
 
-  neutral_left : ∀ a , op neutral a = a := (fun a => (neutral_law a).right)
-  neutral_right : ∀ a : G , op a neutral = a := (fun a => (neutral_law a).left)
-  neutral_law: neutral_pred op neutral := (fun a => ⟨neutral_right a, neutral_left a⟩)
-  inverse_law_left : ∀ a : G, op a (neg a) = neutral
-  inverse_law_right : ∀ a : G, op (neg a) a = neutral
+infixl:65 " ◾ " => Operation.op
+notation "𝟙" => Inhabited.default
 
-  unique_neutral (ha : neutral_pred op a) : a = neutral := unique_neutral ha neutral_law
 
-abbrev groupOperation [Group G op] := op
 
-infixl:20 " ▵ " => groupOperation
+class Group (G: Type) extends Operation G, Inv G, Inhabited G where
+assoc : ∀ a b c : G , (a ◾ b) ◾ c = a ◾  (b ◾ c)
 
-instance : CoeSort (Group G op) (Type) where
+neutral_left : ∀ a: G , 𝟙 ◾ a = a
+neutral_right : ∀ a : G , a ◾ 𝟙 = a
+-- neutral_law: neutral_pred Operation.op (𝟙: G) := (fun a => ⟨neutral_right a, neutral_left a⟩)
+inverse_law_left : ∀ a : G, a ◾  a⁻¹ = 𝟙
+inverse_law_right : ∀ a : G, a⁻¹ ◾  a = 𝟙
+
+-- def Group.unique_neutral {a: G} [Group G] (ha : neutral_pred Operation.op a ) : a = neutral := unique_neutral ha Group.neutral_law
+
+
+instance: CoeSort (Group G) (Type) where
   coe _ := G
 
 
-abbrev nonzeros (g : Group G op):= {x : G // x ≠ g.neutral}
+abbrev Group.nonzeros (g : Group G):= {x : G // x ≠ 𝟙}
 
 
-class AbelianGroup (G: Type) (op : operation G) extends (Group G op) where
-  commutative_law : ∀ a b : G, op a b = op b a
+class AbelianGroup (G: Type) extends (Group G) where
+  commutative_law : ∀ a b : G, a ◾ b = b ◾ a
 
-instance : CoeSort (AbelianGroup G op) (Type) where
+instance : CoeSort (AbelianGroup G) (Type) where
   coe _ := G
 
 abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
@@ -63,18 +63,21 @@ open Lean.TSyntax.Compat in
 macro "∃!" v:ident " : " t:term ", " b:term : term =>
   `(@existsUnique $t (fun $v => $b))
 
-theorem mulWithInversesRight (g: Group G op) {a b : G}  : ∃! x : G, op a x = b := by
+set_option trace.Meta.synthInstance true
+theorem Group.mulWithInversesRight [g: Group G] {a b : g}  : ∃! x : G, a ◾ x = b := by
   unfold existsUnique
-  exists (g.neg a) §op§ b
+  exists a⁻¹ ◾ b
   simp
   apply And.intro
+  have := g.inverse_law_left
   simp [<-g.assoc, g.inverse_law_left, g.neutral_left]
   intro c hc
   simp [<-hc, <-g.assoc, g.inverse_law_right, g.neutral_left]
 
-theorem mulWithInversesLeft (g: Group G op) {a b : G}  : ∃! x : G, op x a = b := by
+
+theorem mulWithInversesLeft (g: Group G) {a b : G}  : ∃! x : G, x ◾ a = b := by
   unfold existsUnique
-  exists b §op§ (g.neg a)
+  exists b ◾ a⁻¹
   simp
   apply And.intro
   simp [g.assoc, g.inverse_law_right, g.neutral_right]

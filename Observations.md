@@ -7,4 +7,6 @@
 - Add and similar are not just syntactic sugar. Lean automatically resolves their definitions in less places than expected. One reliable way to do that is to explicitly define the type with `have x: ...`, or using `unfold Add.add` for one direction.
 - Default values in structures cannot be assumed to not be overwritten, even if they are not. Thus, if you want to use them for syntactic sugar, it often helps to also provide a theorem that they have their expected value (with a default proof.)
 - Type classes and theirs search algorithm are very sophisticated. Knowing the right options to set (i.e. outputParam) can make the compile behave as wanted.
-- `CoeSort` is nice 
+- `CoeSort` is nice
+- Implicit arguments are dangerous, if they sometimes are not implicit (but a global "variable)
+- 
