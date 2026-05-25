@@ -4,17 +4,14 @@ open Group
 
 instance RatAddGroup : AbelianGroup Rat where
   op := Rat.add
-  default := 0
+  neutral := 0
   inv := Rat.neg
   assoc := Rat.add_assoc
   neutral_left := Rat.zero_add
   neutral_right := Rat.add_zero
-  inverse_law_left := Rat.add_neg_cancel
-  inverse_law_right := fun a => by
-    have h := Rat.add_neg_cancel a
-    rw [Rat.add_comm] at h
-    exact h
-  commutative_law := Rat.add_comm
+  inverse_left := Rat.neg_add_cancel
+  inverse_right := Rat.add_neg_cancel
+  comm := Rat.add_comm
 
 #check Rat.mul_eq_zero.mp
 -- set_option pp.all true
@@ -62,7 +59,7 @@ theorem rat_non_zero_inv_is_inv (a : Rat) (ha: a ≠ 0) : (⟨ Rat.inv a, inv_no
 instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} where
   op := rat_mul_non_zero
   inv := rat_inv_non_zero
-  default := ⟨1, by simp⟩
+  neutral := ⟨1, by simp⟩
   assoc := by
     intro ⟨a, ha⟩  ⟨ b, hb⟩  ⟨ c, hc⟩
     simp [<-ret_non_zero_mul_is_mul, Rat.mul_assoc]
@@ -72,17 +69,17 @@ instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} where
   neutral_right := by
     intro ⟨a, ha⟩
     simp [<-ret_non_zero_mul_is_mul, Rat.mul_one]
-  inverse_law_left := by
+  inverse_right := by
     intro ⟨a, ha⟩
     simp [<-ret_non_zero_mul_is_mul, <-rat_non_zero_inv_is_inv]
     apply Rat.mul_inv_cancel
     assumption
-  inverse_law_right := by
+  inverse_left := by
     intro ⟨a, ha⟩
     simp [<-ret_non_zero_mul_is_mul, <-rat_non_zero_inv_is_inv]
     apply Rat.inv_mul_cancel
     assumption
-  commutative_law := by
+  comm := by
     intro ⟨a, ha⟩ ⟨b, hb⟩
     simp [<-ret_non_zero_mul_is_mul]
     apply Rat.mul_comm
@@ -110,7 +107,3 @@ instance ℚ: Field Rat where
     intro a b c
     change a * (b+c) = a * b + a * c
     apply Rat.mul_add
-
-example : (0: ℚ) = (𝟙: ℚ) := by
-
-  simp [Inhabited.default]
