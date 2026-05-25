@@ -34,6 +34,32 @@ attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.invers
 
 instance: CoeSort (Group G) (Type) where
   coe _ := G
+
+instance GroupFromRight [Operation G] [Inv G] [Neutral G]
+(assoc: ∀ a b c : G , (a ◾ b) ◾ c = a ◾  (b ◾ c))
+(neutral_right: ∀ a : G , a ◾ 𝟙 = a)
+(inverse_right:  ∀ a : G, a ◾  a⁻¹ = 𝟙)
+: Group G where
+  assoc := assoc
+  inverse_right := inverse_right
+  neutral_right := neutral_right
+  neutral_left := by
+    intro a
+    apply Eq.symm
+    calc a
+      _ = a ◾ 𝟙 := by rw [neutral_right]
+      _ = a ◾ a⁻¹ ◾ a⁻¹⁻¹ := by rw [assoc, inverse_right]
+      _ = 𝟙 ◾ a⁻¹⁻¹  := by rw [inverse_right]
+      _ = 𝟙 ◾ a := by grind
+  inverse_left := by
+    intro a
+    apply Eq.symm
+    calc 𝟙
+      _ = a⁻¹ ◾ a ◾ (a⁻¹ ◾ a)⁻¹ := by rw [inverse_right]
+      _ = a⁻¹ ◾ a ◾ a⁻¹ ◾ a := by grind
+      _ = a⁻¹ ◾ a := by conv => lhs; lhs; rw [assoc, inverse_right, neutral_right]
+
+
 theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x ◾ a = 𝟙) := by
   unfold unique
   simp
