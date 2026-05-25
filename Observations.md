@@ -9,4 +9,5 @@
 - Type classes and theirs search algorithm are very sophisticated. Knowing the right options to set (i.e. outputParam) can make the compile behave as wanted.
 - `CoeSort` is nice
 - Implicit arguments are dangerous, if they sometimes are not implicit (but a global "variable)
-- 
+- Inheritance and type classes for each operation (inv etc.) allows to use symbols directly in definitions and makes everything clean
+- Default values in type classes are only compile checked at instantiation.
