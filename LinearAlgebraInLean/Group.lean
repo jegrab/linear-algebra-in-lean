@@ -14,25 +14,27 @@ abbrev operation (G: Type u): Type u:= G -> G -> G
 class Operation (G: Type u) where
   op:  operation G
 
+class Neutral (G: Type u) where
+  neutral: G
+
 infixl:65 " ◾ " => Operation.op
-notation "𝟙" => Inhabited.default
+notation "𝟙" => Neutral.neutral
 
 
 
-class Group (G: Type u) extends Operation G, Inv G, Inhabited G where
+class Group (G: Type u) extends Operation G, Inv G, Neutral G where
   assoc : ∀ a b c : G , (a ◾ b) ◾ c = a ◾  (b ◾ c)
   neutral_right : ∀ a : G , a ◾ 𝟙 = a
   neutral_left : ∀ a: G , 𝟙 ◾ a = a
-  inverse_law_right : ∀ a : G, a ◾  a⁻¹ = 𝟙
-  inverse_law_left : ∀ a : G, a⁻¹ ◾  a = 𝟙
+  inverse_right : ∀ a : G, a ◾  a⁻¹ = 𝟙
+  inverse_left : ∀ a : G, a⁻¹ ◾  a = 𝟙
 
-attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.inverse_law_left Group.inverse_law_right
+attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.inverse_left Group.inverse_right
 
 
 instance: CoeSort (Group G) (Type) where
   coe _ := G
 -- def Group.unique_neutral {a: G} [Group G] (ha : neutral_pred Operation.op a ) : a = neutral := unique_neutral ha Group.neutral_law
-abbrev Group.neutral (G: Group G): G := G.default
 theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x ◾ a = 𝟙) := by
   unfold unique
   simp
@@ -57,9 +59,9 @@ abbrev Group.nonzeros (g : Group G):= {x : G // x ≠ 𝟙}
 
 
 class AbelianGroup (G: Type) extends (Group G) where
-  commutative_law : ∀ a b : G, a ◾ b = b ◾ a
+  comm : ∀ a b : G, a ◾ b = b ◾ a
 
-attribute [simp] AbelianGroup.commutative_law
+attribute [simp] AbelianGroup.comm
 
 instance : CoeSort (AbelianGroup G) (Type) where
   coe _ := G
@@ -84,10 +86,10 @@ theorem Group.mulWithInversesRight [g: Group G] {a b : g}  : ∃! x : G, a ◾ x
   exists a⁻¹ ◾ b
   simp
   apply And.intro
-  have := g.inverse_law_right
-  simp [<-g.assoc, g.inverse_law_right, g.neutral_left]
+  have := g.inverse_right
+  simp [<-g.assoc, g.inverse_right, g.neutral_left]
   intro c hc
-  simp [<-hc, <-g.assoc, g.inverse_law_left, g.neutral_left]
+  simp [<-hc, <-g.assoc, g.inverse_left, g.neutral_left]
 
 
 theorem mulWithInversesLeft (g: Group G) {a b : G}  : ∃! x : G, x ◾ a = b := by
@@ -100,45 +102,37 @@ theorem mulWithInversesLeft (g: Group G) {a b : G}  : ∃! x : G, x ◾ a = b :=
   simp_all
 
 
-instance SubGroup [G: Group G] (prop: G -> Prop) (h: prop G.neutral) (closed: ∀ a b : G, prop (a ◾ b⁻¹)):
-Group (Subtype prop) where
-  inv := by
-    intro ⟨a, ha⟩
-    exists a⁻¹
-    have := closed G.neutral a
-    simp [G.neutral_left] at this
-    assumption
 
-  op := by
-    intro ⟨a, ha⟩ ⟨b, hb⟩
-    exists a ◾ b
-    have := closed a b⁻¹
+instance SubGroup [G: Group G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a ◾ b⁻¹)):
+Group (Subtype prop) :=
+  let neutral := by
+    exists 𝟙
+    have := closed inh.default inh.default
     simp_all
+  let inv := by
+      intro ⟨a, ha⟩
+      exists a⁻¹
+      have := closed neutral ⟨a, ha⟩
+      simp [neutral] at this
+      assumption
+  {
+    neutral := neutral
+    inv := inv
+    op := by
+      intro ⟨a, ha⟩ ⟨b, hb⟩
+      exists a ◾ b
+      have := closed ⟨a,ha⟩ (inv ⟨b, hb⟩)
+      simp_all [inv]
 
-  assoc := by
-    simp
+    assoc := by simp
+    neutral_left := by simp [neutral]
+    neutral_right := by simp [neutral]
+    inverse_left := by simp [neutral, inv]
+    inverse_right := by simp [neutral, inv]
+  }
 
-  default := ⟨𝟙, h⟩
-
-  neutral_left := by simp
-  neutral_right := by simp
-  inverse_law_left := by simp
-  inverse_law_right := by simp
-
-instance AbelianSubGroup [G: AbelianGroup G] (prop: G -> Prop) (h: prop G.neutral) (closed: ∀ a b : G, prop (a ◾ b⁻¹)):
+instance AbelianSubGroup [G: AbelianGroup G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a ◾ b⁻¹)):
 AbelianGroup (Subtype prop) := {
-  toGroup := SubGroup prop h closed
-  commutative_law := by simp [Operation.op]
+  toGroup := SubGroup prop inh closed
+  comm := by simp [Operation.op]
 }
-
-
-
-
-
-
-
-
-
-
-
-#check {x // x > 0}
