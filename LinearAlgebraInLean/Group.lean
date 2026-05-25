@@ -34,7 +34,6 @@ attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.invers
 
 instance: CoeSort (Group G) (Type) where
   coe _ := G
--- def Group.unique_neutral {a: G} [Group G] (ha : neutral_pred Operation.op a ) : a = neutral := unique_neutral ha Group.neutral_law
 theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x ◾ a = 𝟙) := by
   unfold unique
   simp
@@ -49,11 +48,27 @@ theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x ◾ a = 𝟙) :
     _ = a₂ := by simp
   simp_all
 
+theorem Group.neutral_unique [G: Group G] : unique (fun x => ∀ a:G, x ◾ a = x) := by
+  unfold unique
+  simp
+  intro b₁ b₂ h₁ h₂
+  have := h₁ b₁⁻¹
+  have := h₂ b₂⁻¹
+  simp at *
+  simp_all
+
+
 @[simp] theorem Group.inv_inv [G: Group G]: ∀ a: G, a⁻¹⁻¹ = a := by
   intro a
   have : a ◾ a⁻¹ = 𝟙 := by simp
   have := Group.inv_unique (a⁻¹) a⁻¹⁻¹ a
   simp_all
+@[simp] theorem Group.inv_neutral [G: Group G]: (𝟙: G)⁻¹ = 𝟙 := by
+  have : (𝟙:G) ◾ 𝟙 = 𝟙 := by simp
+  have := Group.inv_unique (𝟙: G) 𝟙 𝟙⁻¹ this (Group.inverse_left _)
+  apply Eq.symm
+  assumption
+
 
 abbrev Group.nonzeros (g : Group G):= {x : G // x ≠ 𝟙}
 
@@ -136,3 +151,45 @@ AbelianGroup (Subtype prop) := {
   toGroup := SubGroup prop inh closed
   comm := by simp [Operation.op]
 }
+
+
+section
+structure GroupHom (G: Group G) (H: Group H) where
+  hom :  G → H
+  property: ∀ a b: G, hom (a ◾ b) = hom a ◾ hom b
+
+attribute[simp] GroupHom.property
+
+variable [G: Group G] [H: Group H]
+
+instance : CoeFun (GroupHom G H) (λ_ => (G -> H)) where
+  coe hom := hom.hom
+
+
+@[simp] theorem GroupHom.neutral (hom: GroupHom G H): hom 𝟙 = 𝟙 := by
+  apply Eq.symm
+  calc 𝟙
+    _ = hom 𝟙 ◾ (hom 𝟙)⁻¹ := by simp
+      _ = hom (𝟙 ◾ 𝟙) ◾ (hom 𝟙)⁻¹ := by simp
+      _ = hom 𝟙 ◾ hom 𝟙 ◾ (hom 𝟙)⁻¹ := by rw [hom.property]
+      _ = hom 𝟙 := by simp
+@[simp] theorem GroupHom.inv (hom: GroupHom G H) (a: G): hom a⁻¹ = (hom a)⁻¹ := by
+  have := calc hom a⁻¹ ◾ hom a
+    _ = hom (a⁻¹ ◾ a) := by simp [<-hom.property]
+    _ = 𝟙 := by simp
+  have := Group.inv_unique (hom a) (hom a)⁻¹ (hom a⁻¹)
+  simp_all
+
+
+
+
+def GroupHom.kernel (hom: GroupHom G H) := {x : G // hom x = 𝟙}
+
+instance HomKernelSubgroup (hom: GroupHom G H): Group hom.kernel := by
+  apply SubGroup
+  · exists 𝟙
+    simp [GroupHom.neutral]
+  · intro ⟨a, ha⟩ ⟨b, hb⟩
+    simp [ha, hb]
+
+end section

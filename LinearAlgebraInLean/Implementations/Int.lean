@@ -41,3 +41,13 @@ instance EvenIntGroup : AbelianGroup (Subtype Even) := by
     rw [Int.mul_sub]
     simp [hx, hy, Operation.op, Inv.inv]
     rfl
+
+def tripple := {
+  hom:= fun x => 3 * x
+  property := by
+    intro a b
+    simp [Operation.op, Int.mul_add]
+  :GroupHom IntGroup.toGroup IntGroup.toGroup
+}
+
+#eval tripple 2
