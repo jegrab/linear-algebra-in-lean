@@ -96,7 +96,7 @@ theorem Group.neutral_unique [G: Group G] : unique (fun x => ∀ a:G, x ◾ a = 
   assumption
 
 
-abbrev Group.nonzeros (g : Group G):= {x : G // x ≠ 𝟙}
+abbrev Group.non_neutrals (g : Group G):= {x : G // x ≠ 𝟙}
 
 
 class AbelianGroup (G: Type) extends (Group G) where

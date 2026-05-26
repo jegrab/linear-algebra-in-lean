@@ -22,7 +22,7 @@ instance IntGroup : AbelianGroup Int := {
 -- set_option trace.Meta.synthInstance true
 #eval (1: Int) ◾ 2
 #eval (1: IntGroup) ◾ 2⁻¹
-#check IntGroup.nonzeros
+#check IntGroup.Group.non_neutrals
 
 def Even (i: Int) := ∃k: Int, 2 * k = i
 
