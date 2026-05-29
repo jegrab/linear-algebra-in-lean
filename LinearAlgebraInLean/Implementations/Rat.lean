@@ -5,7 +5,7 @@ open Group
 instance RatAddGroup : AbelianGroup Rat where
   op := Rat.add
   neutral := 0
-  inv := Rat.neg
+  groupInv := Rat.neg
   assoc := Rat.add_assoc
   neutral_left := Rat.zero_add
   neutral_right := Rat.add_zero
@@ -58,7 +58,7 @@ theorem rat_non_zero_inv_is_inv (a : Rat) (ha: a ≠ 0) : (⟨ Rat.inv a, inv_no
 
 instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} where
   op := rat_mul_non_zero
-  inv := rat_inv_non_zero
+  groupInv := rat_inv_non_zero
   neutral := ⟨1, by simp⟩
   assoc := by
     intro ⟨a, ha⟩  ⟨ b, hb⟩  ⟨ c, hc⟩
@@ -88,22 +88,13 @@ example (G: Group G) :  (𝟙: G) ◾ 𝟙 = 𝟙 := by
   apply Group.neutral_left
 
 instance ℚ: Field Rat where
-  add := Rat.add
-  addStructure := RatAddGroup
-  mul := (· * ·)
-  mul_closed_zero := by
-    intro a b ha hb
-    have hx := (@Rat.mul_eq_zero a b).mp
-    rw [<-Decidable.not_imp_not, <-@Classical.not_not (a = 0), <-@Classical.not_not (b = 0), <-Classical.not_and_iff_not_or_not, Classical.not_not] at hx
-    apply hx
-    apply And.intro <;> assumption
-
-  mul_eq_mul' := by
-    intro a b ha hb
-    congr
-
-  mulStructure := RatMulGroup
-  distributivity := by
-    intro a b c
-    change a * (b+c) = a * b + a * c
-    apply Rat.mul_add
+    _group_op_is_add := rfl
+    mul_assoc := Rat.mul_assoc
+    one := 1
+    commutative := Rat.mul_comm
+    distributivity := Rat.mul_add
+    one_left := Rat.one_mul
+    one_right := Rat.mul_one
+    mul_inverse_left := Rat.inv_mul_cancel
+    mul_inverse_right := Rat.mul_inv_cancel
+    mul_inverse_zero := Rat.mul_zero
