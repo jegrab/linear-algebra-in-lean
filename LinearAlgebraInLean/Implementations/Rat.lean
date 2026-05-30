@@ -91,7 +91,7 @@ instance ℚ: Field Rat where
     _group_op_is_add := rfl
     mul_assoc := Rat.mul_assoc
     one := 1
-    commutative := Rat.mul_comm
+    mul_comm := Rat.mul_comm
     distributivity := Rat.mul_add
     one_left := Rat.one_mul
     one_right := Rat.mul_one
