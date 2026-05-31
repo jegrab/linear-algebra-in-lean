@@ -3,60 +3,74 @@ import LinearAlgebraInLean.Group
 
 open Group
 
-def Range (n: {n // n > 0}) := {x : Nat // x <n}
+instance Cyclic (n: Nat): Setoid Int where
+  r a b := ↑n ∣ (a - b)
+  iseqv := {
+    refl n := by simp
+    symm h := by rw [<-Int.neg_sub, Int.dvd_neg]; assumption
+    trans h₁ h₂ := by
+      have := Int.dvd_add h₁ h₂
+      simp [<-Int.add_sub_assoc] at this
+      assumption
+  }
 
-instance : Add (Range n) where
-  add := fun ⟨a, _⟩ ⟨b, _ ⟩ =>
-  let thm: (a + b) % n < n := by
-    generalize a + b = x
-    have := n.property
-    rw [gt_iff_lt] at this
-    apply Nat.mod_lt
-    assumption
-    ⟨(a + b) % n, thm⟩
+def ℤ_mod (n: Nat) := Quotient (Cyclic n)
+abbrev ℤ_mod.mk {n: Nat} (a: Int) := Quotient.mk (Cyclic n) a
 
-instance CyclicGroup (n) : AbelianGroup (Range n) Add.add where
-  assoc := by
-    intro ⟨a, _⟩  ⟨ b, _⟩  ⟨ c, _⟩
-    simp [Add.add]
-    congr 2
-    rw [Nat.add_assoc]
-  commutative_law := by
-    intro ⟨a, _⟩ ⟨b, _ ⟩
-    simp [Add.add]
-    congr 2
-    rw [Nat.add_comm]
-  neg := fun ⟨x, hx⟩ => ⟨(n - x) % n, Nat.mod_lt _ n.property⟩
-  neutral := ⟨0, n.property⟩
-  inverse_law_left := by
-    intro ⟨a, _⟩
-    simp [Add.add]
-    congr
-    rw [<-Nat.add_sub_assoc, Nat.add_sub_cancel_left, Nat.mod_self]
-    apply Nat.le_of_lt
-    assumption
-  inverse_law_right := by
-    intro ⟨a, _⟩
-    simp [Add.add]
-    congr
-    rw [Nat.sub_add_cancel, Nat.mod_self]
-    apply Nat.le_of_lt
-    assumption
+instance (n: Nat): AbelianGroup (ℤ_mod n) where
+  op := Quotient.lift₂ (fun a b => ℤ_mod.mk (a + b)) <| by
+      intros a₁ b₁ a₂ b₂ ha hb
+      simp
+      apply Quotient.sound
+      simp [HasEquiv.Equiv, instHasEquivOfSetoid, Setoid.r] at *
+      rw [Int.sub_eq_add_neg, Int.neg_add]
+      conv => rhs; tactic => (calc _ = (a₁ + -a₂) + (b₁ + -b₂) := by ac_rfl)
+      simp [<-Int.sub_eq_add_neg]
+      apply Int.dvd_add <;> assumption
+  neutral := ℤ_mod.mk 0
+  groupInv := Quotient.lift (fun x => ℤ_mod.mk (n - x)) <| by
+      intro a b h
+      simp
+      apply Quotient.sound
+      simp [HasEquiv.Equiv, instHasEquivOfSetoid, Setoid.r] at *
+      simp [Int.sub_eq_add_neg, Int.neg_add]
+      conv => rhs; tactic => (calc _ = (n + -n) + (-a + b) := by ac_rfl)
+      simp [<-Int.sub_eq_add_neg]
+      rw [<-Int.neg_neg (-a + b), Int.neg_add, Int.neg_neg, <-Int.sub_eq_add_neg]
+      apply Int.dvd_neg.mpr
+      assumption
   neutral_left := by
-    intro ⟨a, ah⟩
-    simp [Add.add]
-    congr
-    rw [Nat.mod_eq]
-    simp [n.property, Nat.le_of_lt ah]
-    intro h
-    have := Nat.not_le_of_gt ah
-    contradiction
+    intro a
+    induction a using Quotient.ind
+    simp [ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
   neutral_right := by
-    intro ⟨a, ah⟩
-    simp [Add.add]
-    congr
-    rw [Nat.mod_eq]
-    simp [n.property, Nat.le_of_lt ah]
-    intro h
-    have := Nat.not_le_of_gt ah
-    contradiction
+    intro a
+    induction a using Quotient.ind
+    simp [ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
+  inverse_left := by
+    intro a
+    induction a using Quotient.ind
+    simp [ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
+    apply Quotient.sound
+    simp [HasEquiv.Equiv, instHasEquivOfSetoid, Setoid.r]
+  inverse_right := by
+    intro a
+    induction a using Quotient.ind
+    simp [Quotient.mk, Quotient.lift₂, Quotient.lift]
+    apply Quotient.sound
+    simp [HasEquiv.Equiv, instHasEquivOfSetoid, Setoid.r]
+    conv => rhs; rw [Int.sub_eq_add_neg, Int.add_comm, Int.add_assoc]; rhs; rw [Int.add_comm, <-Int.sub_eq_add_neg]
+    simp
+  comm := by
+    intro a b
+    induction a using Quotient.ind
+    induction b using Quotient.ind
+    simp [Quotient.mk, Quotient.lift₂, Quotient.lift]
+    simp [Int.add_comm]
+  assoc := by
+    intro a b c
+    induction a using Quotient.ind
+    induction b using Quotient.ind
+    induction c using Quotient.ind
+    simp [Quotient.mk, Quotient.lift₂, Quotient.lift]
+    simp [Int.add_assoc]

@@ -35,9 +35,10 @@ class Group (G: Type u) extends Operation G, GroupInv G, Neutral G where
 
 attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.inverse_left Group.inverse_right
 
-
 instance: CoeSort (Group G) (Type) where
   coe _ := G
+
+instance [g: Group G]: Std.Associative (α := G) Operation.op := ⟨g.assoc⟩
 
 instance GroupFromRight [Operation G] [GroupInv G] [Neutral G]
 (assoc: ∀ a b c : G , (a ◾ b) ◾ c = a ◾  (b ◾ c))
@@ -110,6 +111,8 @@ attribute [simp] AbelianGroup.comm
 
 instance : CoeSort (AbelianGroup G) (Type) where
   coe _ := G
+
+instance [g: AbelianGroup G]: Std.Commutative (α := G) Operation.op := ⟨g.comm⟩
 
 abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
 
