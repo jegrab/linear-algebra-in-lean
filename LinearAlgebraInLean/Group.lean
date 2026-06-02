@@ -79,23 +79,22 @@ theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x + a = 0) := by
   apply Eq.symm
   assumption
 
-  @[simp] theorem Group.inv_inv [G: Group G]: ∀ a: G, - - a = a := by
+@[simp] theorem Group.inv_inv [G: Group G]: ∀ a: G, - - a = a := by
   intro a
   have : a + -a = 0 := by simp
   have := Group.inv_unique (-a) (- - a) a
   simp_all
 
-theorem Group.neutral_unique [G: Group G] : unique (fun x => ∀ a:G, x + a = a) := by
+theorem Group.neutral_unique [G: Group G] (a: G) : unique (fun x => x + a = a) := by
   unfold unique
   simp
   intro b₁ b₂ h₁ h₂
-  have x := h₁ (-b₁)
-  have y := h₂ (-b₂)
-  simp at *
-  rw [x] at y
-  have z : - -b₁ = - -b₂ := by congr
-  simp [Group.inv_inv] at z
-  simp_all
+  calc
+    _ = b₁ + 0 := by simp
+    _ = b₁ + a + -a := by simp
+    _ = b₂ +a + -a := by simp[h₁, h₂]
+    _ = b₂ + 0 := by simp
+    _ = b₂ := by simp
 
 abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
@@ -200,9 +199,9 @@ AbelianGroup (Subtype prop) := {
 section
 structure GroupHom (G: Group G) (H: Group H) where
   hom :  G → H
-  property: ∀ a b: G, hom (a + b) = hom a + hom b
+  add: ∀ a b: G, hom (a + b) = hom a + hom b
 
-attribute[simp] GroupHom.property
+attribute[simp] GroupHom.add
 
 variable [G: Group G] [H: Group H]
 
@@ -210,16 +209,16 @@ instance : CoeFun (GroupHom G H) (λ_ => (G -> H)) where
   coe hom := hom.hom
 
 
-@[simp] theorem GroupHom.neutral (hom: GroupHom G H): hom 0 = 0 := by
+@[simp] theorem GroupHom.zero (hom: GroupHom G H): hom 0 = 0 := by
   apply Eq.symm
   calc 0
     _ = hom 0 + -(hom 0) := by simp
       _ = hom (0 + 0) + -(hom 0) := by simp
-      _ = hom 0 + hom 0 + -(hom 0) := by rw [hom.property]
+      _ = hom 0 + hom 0 + -(hom 0) := by rw [hom.add]
       _ = hom 0 := by simp
-@[simp] theorem GroupHom.inv (hom: GroupHom G H) (a: G): hom (-a) = -(hom a) := by
+@[simp] theorem GroupHom.neg (hom: GroupHom G H) (a: G): hom (-a) = -(hom a) := by
   have := calc hom (-a) + hom a
-    _ = hom (-a + a) := by simp [<-hom.property]
+    _ = hom (-a + a) := by simp [<-hom.add]
     _ = 0 := by simp
   have := Group.inv_unique (hom a) (-hom a) (hom (-a))
   simp_all
@@ -232,7 +231,7 @@ def GroupHom.kernel (hom: GroupHom G H) := {x : G // hom x = 0}
 instance HomKernelSubgroup (hom: GroupHom G H): Group hom.kernel := by
   apply SubGroup
   · exists 0
-    simp [GroupHom.neutral]
+    simp [GroupHom.zero]
   · intro ⟨a, ha⟩ ⟨b, hb⟩
     simp [ha, hb]
 

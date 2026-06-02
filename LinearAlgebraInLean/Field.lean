@@ -1,11 +1,15 @@
 import LinearAlgebraInLean.Group
+import LinearAlgebraInLean.Util
 
 
 class Ring (R: Type) extends AbelianGroup R, Mul R where
   mul_assoc: ∀ a b c: R, a * b * c = a * (b * c)
-  distributivity : ∀ a b c : R , a  * (b + c) = (a * b) + (a * c)
+  distr_right : ∀ a b c : R , a  * (b + c) = (a * b) + (a * c)
+  distr_left : ∀ a b c : R , (b + c) * a = (b * a) + (c * a)
 
-attribute[simp] Ring.mul_assoc Ring.distributivity
+
+attribute[simp] Ring.mul_assoc Ring.distr_left Ring.distr_right
+
 
 class R1ng (R: Type) extends Ring R, One R where
   one_right: ∀ a: R, a * 1 = a
@@ -33,9 +37,14 @@ instance [G: Field X]: OfNat (Group.non_zeros G.toGroup) (nat_lit 1) where
 
 instance [R: Field R] : HDiv R R.non_zeros R where
   hDiv a b := a * b⁻¹
-namespace Field
 
-theorem inv_unique [F: Field F] (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
+
+
+
+namespace Field
+variable [F: Field F]
+
+theorem inv_unique (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
   unfold unique
   simp
   intro a₁ a₂ h₁ h₂
@@ -56,7 +65,41 @@ theorem inv_unique [F: Field F] (a: F) (h: a ≠ 0): unique (fun x => x * a = 1)
       simp
   simp_all
 
-@[simp] theorem inv_one [F: Field F]: (1: F.non_zeros)⁻¹ = (1: F) := by
+
+
+@[simp] theorem zero_mul (a: F): 0 * a = 0 := by
+  have := calc 0 * a
+    _ = (0 + 0) * a := by simp
+    _ = 0 * a + 0 * a := by rw [Ring.distr_left]
+  have := Group.neutral_unique _ (0: F) (0 * a) (Group.neutral_left _) (this.symm)
+  exact this.symm
+
+@[simp] theorem mul_zero (a: F): a * 0 = 0 := by
+ rw [CommutativeRing.mul_comm]
+ apply Field.zero_mul
+
+@[simp] theorem neg_mul (a: F): -1 * a = -a := by
+  have : -1 * a + a = 0 := by calc
+    _ = -1 * a + 1 * a := by simp
+    _ = (-1 + 1) * a := by rw[Ring.distr_left]
+    _ = 0 * a := by simp
+    _ = 0 := by simp
+  have := Group.inv_unique a (-1 * a) (-a) this (Group.inverse_left _)
+  exact this
+
+theorem one_unique (a: F.non_zeros): unique (fun x: F => x * a = a) := by
+  unfold unique
+  intro b₁ b₂ h₁ h₂
+  let ai := a⁻¹
+  calc b₁
+    _ = b₁ * 1 := by simp
+    _ = b₁ * a * ai := by unfold ai; rw[Ring.mul_assoc, Field.mul_inverse_right a.property]
+    _ = b₂ * a * ai := by simp [h₁, h₂]
+    _ = b₂ * 1 := by unfold ai; rw [Ring.mul_assoc, Field.mul_inverse_right]
+    _ = b₂ := by simp
+
+
+@[simp] theorem inv_one: (1: F.non_zeros)⁻¹ = (1: F) := by
   have : (1:F) * 1 = 1 := by simp
   have inv_one_times_one: ((1:F.non_zeros)⁻¹.val) * 1 = 1 := by
     apply mul_inverse_left
@@ -64,18 +107,47 @@ theorem inv_unique [F: Field F] (a: F) (h: a ≠ 0): unique (fun x => x * a = 1)
   apply Eq.symm
   assumption
 
-theorem div_by_one [F: Field F] {a: F}: a / (1: F.non_zeros) = a := by
+theorem div_by_one {a: F}: a / (1: F.non_zeros) = a := by
   simp [HDiv.hDiv]
 
 end Field
 
-private def nat_to_field [f: R1ng R]: Nat -> R
-  | 0 => 0
-  | n + 1 => nat_to_field n + f.one
+-- private def nat_to_field [f: R1ng R]: Nat -> R
+--   | 0 => 0
+--   | n + 1 => nat_to_field n + f.one
 
-instance [f: Field R]: OfNat (R) n where
-  ofNat := nat_to_field n
+-- instance [f: Field R]: OfNat (R) n where
+--   ofNat := nat_to_field n
 
+
+structure FieldHom (F: Field F) (G: Field G) extends GroupHom F.toGroup G.toGroup where
+  mul: ∀ a b:F, hom (a * b) = hom a * hom b
+
+attribute[simp] FieldHom.mul
+
+variable [F: Field F] [G: Field G]
+
+instance : CoeFun (FieldHom F G) (λ_ => (F -> G)) where
+  coe hom := hom.hom
+
+
+@[simp] theorem FieldHom.one (hom: FieldHom F G): hom 1 = 1 := by
+  apply Eq.symm
+  have: hom 1 = hom 1 * hom 1 := by calc hom 1
+    _ = hom (1 * 1) := by simp
+    _ = hom 1 * hom 1 := by simp[<-hom.mul]
+  apply Field.inv_unique
+  all_goals sorry
+
+
+
+-- todo
+-- @[simp] theorem FieldHom.inv (hom: FieldHom F G) (a: F.non_zeros): hom (a⁻¹) = (hom a)⁻¹ := by
+--   have := calc hom (a⁻¹) + hom a
+--     _ = hom (a⁻¹ * a) := by simp [<-hom.mul]
+--     _ = 1 := by simp
+--   have := Field.inv_unique (hom a) (hom a)⁻¹ (hom a⁻¹)
+--   simp_all
 
 -- instance FieldOfTwoGroups [DecidableEq R] [add: AbelianGroup R] [mul: AbelianGroup add.non_neutrals] (dist: ∀ a b c: add.non_neutrals, a §add.op§ (b §mul.op§ c) = (a §mul.op§ b) §add.op§ (a §mul.op§ c))
 -- : Field R :=
