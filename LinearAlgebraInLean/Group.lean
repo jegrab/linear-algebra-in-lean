@@ -32,13 +32,7 @@ namespace Group
 
 theorem a_sub_a_is_zero [Group G] {a : G} : a - a = 0 := by
   simp [HSub.hSub, Sub.sub]
-
 end Group
-
-
-
-
-
 
 abbrev GroupFromRight [Add G] [Neg G] [Zero G]
 (assoc: ∀ a b c : G , (a + b) + c = a +  (b + c))
@@ -101,7 +95,7 @@ theorem Group.neutral_unique [G: Group G] : unique (fun x => ∀ a:G, x + a = x)
   assumption
 
 
-abbrev Group.non_neutrals (g : Group G):= {x : G // x ≠ 0}
+abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
 
 class AbelianGroup (G: Type) extends (Group G) where

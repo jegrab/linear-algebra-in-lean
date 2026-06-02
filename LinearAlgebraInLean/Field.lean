@@ -1,31 +1,71 @@
 import LinearAlgebraInLean.Group
 
 
-class Ring (R: Type) extends AbelianGroup R, Add R, Mul R where
-  _group_op_is_add: Operation.op = (@Add.add R _) := by rfl -- todo just use add syntax for group?
+class Ring (R: Type) extends AbelianGroup R, Mul R where
   mul_assoc: ∀ a b c: R, a * b * c = a * (b * c)
   distributivity : ∀ a b c : R , a  * (b + c) = (a * b) + (a * c)
 
-attribute [simp] Ring._group_op_is_add
+attribute[simp] Ring.mul_assoc Ring.distributivity
 
-instance [Ring R]: Zero R where
-  zero := 𝟙
-
-class R1ng (R: Type) extends Ring R, One R, Zero R where
+class R1ng (R: Type) extends Ring R, One R where
   one_right: ∀ a: R, a * 1 = a
   one_left: ∀ a: R, 1 * a = a
 
-class CommutativeRing (R: Type) extends R1ng R where
+attribute[simp] R1ng.one_right R1ng.one_left
+
+class CommutativeRing (R: Type) extends Ring R where
   mul_comm: ∀ a b: R, a * b = b * a
 
-class Field (R : Type) extends CommutativeRing R, Inv R where
-  mul_inverse_left: ∀ a ≠ 0, (a:R)⁻¹ * a = 1
-  mul_inverse_right: ∀ a ≠ 0, (a:R) * a⁻¹ = 1
-  mul_inverse_zero: ∀ a, (a: R) * 0 = 0 -- todo require this?
+attribute[simp] CommutativeRing.mul_comm
+
+class Field (R : Type) extends CommutativeRing R, R1ng R, Inv (Group.non_zeros toGroup) where
+  mul_inverse_left: ∀ (h: a ≠ 0), (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ * a = 1
+  mul_inverse_right: ∀ (h:a ≠ 0), (a:R) * (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ = 1
+  one_is_not_zero : (1: R) ≠ 0
+
+attribute[simp] Field.mul_inverse_left Field.mul_inverse_right Field.one_is_not_zero
 
 instance : CoeSort (Field R) Type where
   coe _ := R
 
+instance [G: Field X]: OfNat (Group.non_zeros G.toGroup) (nat_lit 1) where
+  ofNat := ⟨(1: G), by simp⟩
+
+instance [R: Field R] : HDiv R R.non_zeros R where
+  hDiv a b := a * b⁻¹
+namespace Field
+
+theorem inv_unique [F: Field F] (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
+  unfold unique
+  simp
+  intro a₁ a₂ h₁ h₂
+  let x : F.non_zeros := ⟨a, h⟩
+  have := calc (x⁻¹).val
+    _ = 1 * x⁻¹ := by simp
+    _ = a₁ * a * x⁻¹ := by simp [h₁]
+    _ = a₁ := by
+      rw [Ring.mul_assoc]
+      unfold x
+      simp
+  have := calc (x⁻¹).val
+    _ = 1 * x⁻¹ := by simp
+    _ = a₂ * a * x⁻¹ := by simp [h₂]
+    _ = a₂ := by
+      rw [Ring.mul_assoc]
+      unfold x
+      simp
+  simp_all
+
+@[simp] theorem one_inv_one [F: Field F]: (1: F.non_zeros)⁻¹ = (1: F) := by
+  have h : neutral_pred (F.mul) F.one :=
+  have := unique_neutral ()
+
+
+theorem div_by_one [F: Field F] {a: F}: a / (1: F.non_zeros) = a := by
+  simp [HDiv.hDiv]
+  sorry
+
+end Field
 
 private def nat_to_field [f: R1ng R]: Nat -> R
   | 0 => 0
