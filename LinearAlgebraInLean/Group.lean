@@ -40,7 +40,7 @@ instance: CoeSort (Group G) (Type) where
 
 instance [g: Group G]: Std.Associative (α := G) Operation.op := ⟨g.assoc⟩
 
-instance GroupFromRight [Operation G] [GroupInv G] [Neutral G]
+abbrev GroupFromRight [Operation G] [GroupInv G] [Neutral G]
 (assoc: ∀ a b c : G , (a ◾ b) ◾ c = a ◾  (b ◾ c))
 (neutral_right: ∀ a : G , a ◾ 𝟙 = a)
 (inverse_right:  ∀ a : G, a ◾  a⁻ = 𝟙)
@@ -151,7 +151,7 @@ theorem mulWithInversesLeft (g: Group G) {a b : G}  : ∃! x : G, x ◾ a = b :=
 
 
 
-instance SubGroup [G: Group G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a ◾ b⁻)):
+abbrev SubGroup [G: Group G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a ◾ b⁻)):
 Group (Subtype prop) :=
   let neutral := by
     exists 𝟙
@@ -179,7 +179,7 @@ Group (Subtype prop) :=
     inverse_right := by simp [neutral, inv]
   }
 
-instance AbelianSubGroup [G: AbelianGroup G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a ◾ b⁻)):
+abbrev AbelianSubGroup [G: AbelianGroup G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a ◾ b⁻)):
 AbelianGroup (Subtype prop) := {
   toGroup := SubGroup prop inh closed
   comm := by simp [Operation.op]
