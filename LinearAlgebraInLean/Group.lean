@@ -96,6 +96,29 @@ theorem Group.neutral_unique [G: Group G] (a: G) : unique (fun x => x + a = a) :
     _ = b₂ + 0 := by simp
     _ = b₂ := by simp
 
+
+theorem Group.neutral_unique_right [G: Group G] (a: G) : unique (fun x => a + x = a) := by
+  unfold unique
+  simp
+  intro b₁ b₂ h₁ h₂
+  calc
+    _ = 0 + b₁ := by simp
+    _ = -a + a + b₁ := by simp
+    _ = -a + (a + b₁) := by rw [Group.assoc]
+    _ = -a + (a + b₂) := by simp[h₁, h₂]
+    _ = 0 + b₂ := by simp[<-Group.assoc]
+    _ = b₂ := by simp
+
+theorem Group.eq_zero_of_add_eq_self [G: Group G] {a x: G} (h: x + a = a) : x = 0 := by
+  have g := Group.neutral_unique a x 0 h
+  simp at g
+  exact g
+
+theorem Group.eq_zero_of_add_eq_self_right [G: Group G] {a x: G} (h: a + x = a) : x = 0 := by
+  have g := Group.neutral_unique_right a x 0 h
+  simp at g
+  exact g
+
 abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
 

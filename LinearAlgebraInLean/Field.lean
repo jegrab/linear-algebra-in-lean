@@ -71,8 +71,8 @@ theorem inv_unique (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
   have := calc 0 * a
     _ = (0 + 0) * a := by simp
     _ = 0 * a + 0 * a := by rw [Ring.distr_left]
-  have := Group.neutral_unique _ (0: F) (0 * a) (Group.neutral_left _) (this.symm)
-  exact this.symm
+  have := Group.eq_zero_of_add_eq_self (Eq.symm this)
+  exact this
 
 @[simp] theorem mul_zero (a: F): a * 0 = 0 := by
  rw [CommutativeRing.mul_comm]
