@@ -56,14 +56,16 @@ theorem inv_unique [F: Field F] (a: F) (h: a ≠ 0): unique (fun x => x * a = 1)
       simp
   simp_all
 
-@[simp] theorem one_inv_one [F: Field F]: (1: F.non_zeros)⁻¹ = (1: F) := by
-  have h : neutral_pred (F.mul) F.one :=
-  have := unique_neutral ()
-
+@[simp] theorem inv_one [F: Field F]: (1: F.non_zeros)⁻¹ = (1: F) := by
+  have : (1:F) * 1 = 1 := by simp
+  have inv_one_times_one: ((1:F.non_zeros)⁻¹.val) * 1 = 1 := by
+    apply mul_inverse_left
+  have := Field.inv_unique (1: F) F.one_is_not_zero (1: F.non_zeros) (1: F.non_zeros)⁻¹.val this inv_one_times_one
+  apply Eq.symm
+  assumption
 
 theorem div_by_one [F: Field F] {a: F}: a / (1: F.non_zeros) = a := by
   simp [HDiv.hDiv]
-  sorry
 
 end Field
 

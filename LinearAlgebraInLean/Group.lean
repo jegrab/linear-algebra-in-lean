@@ -73,27 +73,29 @@ theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x + a = 0) := by
     _ = a₂ := by simp
   simp_all
 
-theorem Group.neutral_unique [G: Group G] : unique (fun x => ∀ a:G, x + a = x) := by
-  unfold unique
-  simp
-  intro b₁ b₂ h₁ h₂
-  have := h₁ (-b₁)
-  have := h₂ (-b₂)
-  simp at *
-  simp_all
-
-
-@[simp] theorem Group.inv_inv [G: Group G]: ∀ a: G, - - a = a := by
-  intro a
-  have : a + -a = 0 := by simp
-  have := Group.inv_unique (-a) (- - a) a
-  simp_all
 @[simp] theorem Group.inv_neutral [G: Group G]: -(0: G) = 0 := by
   have : (0:G) + 0 = 0 := by simp
   have := Group.inv_unique (0: G) 0 (-0) this (Group.inverse_left _)
   apply Eq.symm
   assumption
 
+  @[simp] theorem Group.inv_inv [G: Group G]: ∀ a: G, - - a = a := by
+  intro a
+  have : a + -a = 0 := by simp
+  have := Group.inv_unique (-a) (- - a) a
+  simp_all
+
+theorem Group.neutral_unique [G: Group G] : unique (fun x => ∀ a:G, x + a = a) := by
+  unfold unique
+  simp
+  intro b₁ b₂ h₁ h₂
+  have x := h₁ (-b₁)
+  have y := h₂ (-b₂)
+  simp at *
+  rw [x] at y
+  have z : - -b₁ = - -b₂ := by congr
+  simp [Group.inv_inv] at z
+  simp_all
 
 abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
