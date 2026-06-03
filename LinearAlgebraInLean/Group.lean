@@ -119,6 +119,27 @@ theorem Group.eq_zero_of_add_eq_self_right [G: Group G] {a x: G} (h: a + x = a) 
   simp at g
   exact g
 
+theorem Group.remove_both_sides_left [Group G] (x: G) (h: x + a = x + b) : a = b := by
+  have h: -x + (x + a) = -x + (x + b) := by rw[h]
+  rw [<-Group.assoc,<-Group.assoc] at h
+  simp at h
+  assumption
+
+theorem Group.remove_both_sides_right [Group G] (x: G) (h: a + x = b + x) : a = b := by
+  have h: a + x + -x = b + x + -x := by rw[h]
+  simp at h
+  assumption
+
+theorem Group.move_right [G: Group G] {a b: G} (h: a + b = 0) : a = -b := by
+  apply Group.remove_both_sides_right b
+  simp
+  assumption
+
+theorem Group.move_left [G: Group G] {a b: G} (h: a + b = 0) : b = -a := by
+  apply Group.remove_both_sides_left a
+  simp
+  assumption
+
 abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
 

@@ -7,6 +7,43 @@ class Ring (R: Type) extends AbelianGroup R, Mul R where
   distr_right : ∀ a b c : R , a  * (b + c) = (a * b) + (a * c)
   distr_left : ∀ a b c : R , (b + c) * a = (b * a) + (c * a)
 
+namespace Ring
+variable [Ring R]
+
+@[simp] theorem zero_mul (a: R): 0 * a = 0 := by
+  have := calc 0 * a
+    _ = (0 + 0) * a := by simp
+    _ = 0 * a + 0 * a := by rw [Ring.distr_left]
+  have := Group.eq_zero_of_add_eq_self (Eq.symm this)
+  exact this
+
+@[simp] theorem mul_zero (a: R): a * 0 = 0 := by
+  have := calc a * 0
+    _ = a * (0 + 0) := by simp
+    _ = a * 0 + a*0 := by rw [Ring.distr_right]
+  have := Group.eq_zero_of_add_eq_self (Eq.symm this)
+  exact this
+
+
+theorem mul_both_right {a b: R} (x: R) (h: a = b): a*x = b*x := by simp[h]
+theorem mul_both_left {a b: R} (x: R) (h: a = b): x*a = x*b := by simp[h]
+
+@[simp] theorem put_neg_out_of_mul_left {a b: R}: -a*b = -(a*b) := by
+  have : a + -a = 0 := by simp
+  have : (a + -a)*b = 0*b := mul_both_right b this
+  have : a *b + -a * b = 0 := by simp[<-distr_left]
+  have : -a * b = -(a * b) := Group.move_left this
+  assumption
+
+@[simp] theorem put_neg_out_of_mul_right {a b: R}: a*-b = -(a*b) := by
+  have : b + -b = 0 := by simp
+  have : a*(b + -b) = a*0 := mul_both_left a this
+  have : a *b + a * -b = 0 := by simp[<-distr_right]
+  have : a * -b = -(a * b) := Group.move_left this
+  assumption
+
+end Ring
+
 
 attribute[simp] Ring.mul_assoc Ring.distr_left Ring.distr_right
 
@@ -65,19 +102,6 @@ theorem inv_unique (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
       simp
   simp_all
 
-
-
-@[simp] theorem zero_mul (a: F): 0 * a = 0 := by
-  have := calc 0 * a
-    _ = (0 + 0) * a := by simp
-    _ = 0 * a + 0 * a := by rw [Ring.distr_left]
-  have := Group.eq_zero_of_add_eq_self (Eq.symm this)
-  exact this
-
-@[simp] theorem mul_zero (a: F): a * 0 = 0 := by
- rw [CommutativeRing.mul_comm]
- apply Field.zero_mul
-
 @[simp] theorem neg_mul (a: F): -1 * a = -a := by
   have : -1 * a + a = 0 := by calc
     _ = -1 * a + 1 * a := by simp
@@ -109,6 +133,24 @@ theorem one_unique (a: F.non_zeros): unique (fun x: F => x * a = a) := by
 
 theorem div_by_one {a: F}: a / (1: F.non_zeros) = a := by
   simp [HDiv.hDiv]
+
+-- mul_inverse_right: ∀ (h:a ≠ 0), (a:R) * (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ = 1
+theorem move_inverse (x: F.non_zeros)(h: a = (x⁻¹).val * b) : x.val * a = b := by
+  rw[h, <-Ring.mul_assoc]
+  have ⟨a, ha⟩ := x
+  simp
+
+theorem move_inverse_back (x: F.non_zeros)(h: x.val * a = b) : a = (x⁻¹).val * b:= by
+  rw[<-h, <-Ring.mul_assoc]
+  have ⟨a, ha⟩ := x
+  simp
+
+theorem remove_both_sides_left (x: F.non_zeros) (h: x.val * a = x.val *b) : a = b := by
+  have h : x⁻¹.val * (x.val * a) = x⁻¹.val * (x.val *b) := by rw[h]
+  rw [<-Ring.mul_assoc,<-Ring.mul_assoc] at h
+  have ⟨a,ha ⟩:=x
+  simp at h
+  assumption
 
 end Field
 
