@@ -2,22 +2,22 @@ import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Util
 
 
-class Ring (R: Type) extends AbelianGroup R, Mul R where
+class Rng (R: Type) extends AbelianGroup R, Mul R where
   mul_assoc: ∀ a b c: R, a * b * c = a * (b * c)
   distr_right : ∀ a b c : R , a  * (b + c) = (a * b) + (a * c)
   distr_left : ∀ a b c : R , (b + c) * a = (b * a) + (c * a)
 
 
-attribute[simp] Ring.mul_assoc Ring.distr_left Ring.distr_right
+attribute[simp] Rng.mul_assoc Rng.distr_left Rng.distr_right
 
 
-class R1ng (R: Type) extends Ring R, One R where
+class R1ng (R: Type) extends Rng R, One R where
   one_right: ∀ a: R, a * 1 = a
   one_left: ∀ a: R, 1 * a = a
 
 attribute[simp] R1ng.one_right R1ng.one_left
 
-class CommutativeRing (R: Type) extends Ring R where
+class CommutativeRing (R: Type) extends Rng R where
   mul_comm: ∀ a b: R, a * b = b * a
 
 attribute[simp] CommutativeRing.mul_comm
@@ -30,6 +30,10 @@ class Field (R : Type) extends CommutativeRing R, R1ng R, Inv (Group.non_zeros t
 attribute[simp] Field.mul_inverse_left Field.mul_inverse_right Field.one_is_not_zero
 
 instance : CoeSort (Field R) Type where
+  coe _ := R
+instance : CoeSort (Rng R) Type where
+  coe _ := R
+instance : CoeSort (R1ng R) Type where
   coe _ := R
 
 instance [G: Field X]: OfNat (Group.non_zeros G.toGroup) (nat_lit 1) where
@@ -44,33 +48,35 @@ instance [R: Field R] : HDiv R R.non_zeros R where
 namespace Field
 variable [F: Field F]
 
-theorem inv_unique (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
-  unfold unique
-  simp
-  intro a₁ a₂ h₁ h₂
-  let x : F.non_zeros := ⟨a, h⟩
-  have := calc (x⁻¹).val
-    _ = 1 * x⁻¹ := by simp
-    _ = a₁ * a * x⁻¹ := by simp [h₁]
-    _ = a₁ := by
-      rw [Ring.mul_assoc]
-      unfold x
-      simp
-  have := calc (x⁻¹).val
-    _ = 1 * x⁻¹ := by simp
-    _ = a₂ * a * x⁻¹ := by simp [h₂]
-    _ = a₂ := by
-      rw [Ring.mul_assoc]
-      unfold x
-      simp
-  simp_all
-
-
+theorem inv_unique {x a: F} (ha: a ≠ 0): a * x = 1 -> x = (⟨a, ha⟩: F.non_zeros)⁻¹ := by
+  have (a:F) (h: a ≠ 0) : unique (fun x => a * x = 1) := by
+    unfold unique
+    simp
+    intro a₁ a₂ h₁ h₂
+    let x : F.non_zeros := ⟨a, h⟩
+    have := calc (x⁻¹).val
+      _ = 1 * x⁻¹ := by simp
+      _ = a₁ * a * x⁻¹ := by simp [h₁]
+      _ = a₁ := by
+        rw [Rng.mul_assoc]
+        unfold x
+        simp
+    have := calc (x⁻¹).val
+      _ = 1 * x⁻¹ := by simp
+      _ = a₂ * a * x⁻¹ := by simp [h₂]
+      _ = a₂ := by
+        rw [Rng.mul_assoc]
+        unfold x
+        simp
+    simp_all
+  intro h
+  have := this a ha x ↑(⟨a,ha⟩: F.non_zeros)⁻¹ h (F.mul_inverse_right ha)
+  assumption
 
 @[simp] theorem zero_mul (a: F): 0 * a = 0 := by
   have := calc 0 * a
     _ = (0 + 0) * a := by simp
-    _ = 0 * a + 0 * a := by rw [Ring.distr_left]
+    _ = 0 * a + 0 * a := by rw [Rng.distr_left]
   have := Group.neutral_unique _ (0: F) (0 * a) (Group.neutral_left _) (this.symm)
   exact this.symm
 
@@ -81,29 +87,33 @@ theorem inv_unique (a: F) (h: a ≠ 0): unique (fun x => x * a = 1) := by
 @[simp] theorem neg_mul (a: F): -1 * a = -a := by
   have : -1 * a + a = 0 := by calc
     _ = -1 * a + 1 * a := by simp
-    _ = (-1 + 1) * a := by rw[Ring.distr_left]
+    _ = (-1 + 1) * a := by rw[Rng.distr_left]
     _ = 0 * a := by simp
     _ = 0 := by simp
-  have := Group.inv_unique a (-1 * a) (-a) this (Group.inverse_left _)
-  exact this
+  have := Group.neg_unique this
+  have := congrArg F.neg this
+  rw [Group.neg_neg] at this
+  exact this.symm
 
-theorem one_unique (a: F.non_zeros): unique (fun x: F => x * a = a) := by
-  unfold unique
-  intro b₁ b₂ h₁ h₂
-  let ai := a⁻¹
-  calc b₁
-    _ = b₁ * 1 := by simp
-    _ = b₁ * a * ai := by unfold ai; rw[Ring.mul_assoc, Field.mul_inverse_right a.property]
-    _ = b₂ * a * ai := by simp [h₁, h₂]
-    _ = b₂ * 1 := by unfold ai; rw [Ring.mul_assoc, Field.mul_inverse_right]
-    _ = b₂ := by simp
+theorem one_unique {e a: F} (ha: a ≠ 0) : e * a = a -> e = 1 := by
+  have (a: F.non_zeros): unique (fun x: F => x * a = a) := by
+    unfold unique
+    intro b₁ b₂ h₁ h₂
+    let ai := a⁻¹
+    calc b₁
+      _ = b₁ * 1 := by simp
+      _ = b₁ * a * ai := by unfold ai; rw[Rng.mul_assoc, Field.mul_inverse_right a.property]
+      _ = b₂ * a * ai := by simp [h₁, h₂]
+      _ = b₂ * 1 := by unfold ai; rw [Rng.mul_assoc, Field.mul_inverse_right]
+      _ = b₂ := by simp
+  intro neutral
+  exact this ⟨a, ha⟩ e 1 neutral (Field.one_left _)
 
 
 @[simp] theorem inv_one: (1: F.non_zeros)⁻¹ = (1: F) := by
   have : (1:F) * 1 = 1 := by simp
-  have inv_one_times_one: ((1:F.non_zeros)⁻¹.val) * 1 = 1 := by
-    apply mul_inverse_left
-  have := Field.inv_unique (1: F) F.one_is_not_zero (1: F.non_zeros) (1: F.non_zeros)⁻¹.val this inv_one_times_one
+  have inv_one_times_one: (1:F) * 1 = 1 := by simp
+  have := Field.inv_unique (F.one_is_not_zero) inv_one_times_one
   apply Eq.symm
   assumption
 
@@ -120,34 +130,66 @@ end Field
 --   ofNat := nat_to_field n
 
 
-structure FieldHom (F: Field F) (G: Field G) extends GroupHom F.toGroup G.toGroup where
+structure RngHom (F: Rng F) (G: Rng G) extends GroupHom F.toGroup G.toGroup where
   mul: ∀ a b:F, hom (a * b) = hom a * hom b
 
-attribute[simp] FieldHom.mul
+structure R1ngHom (F: R1ng F) (G: R1ng G) extends RngHom F.toRng G.toRng where
+  one: hom (1: F) = 1
+
+def FieldHom (F: Field F) (G: Field G) := R1ngHom F.toR1ng G.toR1ng
+
+attribute[simp] RngHom.mul R1ngHom.one
+
+
+instance : CoeFun (RngHom F G) (λ_ => (F -> G)) where
+  coe hom := hom.hom
+instance : CoeFun (R1ngHom F G) (λ_ => (F -> G)) where
+  coe hom := hom.hom
 
 variable [F: Field F] [G: Field G]
-
 instance : CoeFun (FieldHom F G) (λ_ => (F -> G)) where
   coe hom := hom.hom
 
+theorem FieldHom.injective (hom: FieldHom F G) : Function.Injective hom := by
+  unfold Function.Injective
+  intro a b h
+  let u := a - b
+  have : hom u = 0 := by calc
+    _ = hom a + hom (-b) := by simp[u]
+    _ = hom a + -hom b := by simp
+    _ = hom a - hom b := by simp
+    _ = _ := by simp[h]
+  suffices u = 0 by
+    have := congrArg (. + b) this
+    simp[u] at this
+    calc a
+     _ = a + 0 := by simp
+     _ = a + b - b := by simp
+     _ = b + a + -b := by simp
+     _ = b + (a + -b) := by simp[<-F.assoc]
+     _ = b := by simp[this]
+  false_or_by_contra
+  rename_i hu
+  let u_inv: F := ↑(⟨u, by simp [hu]⟩: F.non_zeros)⁻¹
+  have := calc
+    1 = hom 1 := by simp
+    _ = hom (u * u_inv) := by simp [u_inv]
+    _ = hom u * hom u_inv := by simp
+    _ = 0 := by simp [this]
+  have := G.one_is_not_zero
+  contradiction
 
-@[simp] theorem FieldHom.one (hom: FieldHom F G): hom 1 = 1 := by
-  apply Eq.symm
-  have: hom 1 = hom 1 * hom 1 := by calc hom 1
-    _ = hom (1 * 1) := by simp
-    _ = hom 1 * hom 1 := by simp[<-hom.mul]
-  apply Field.inv_unique
-  all_goals sorry
 
+theorem FieldHom.nonzero_nonzero (hom: FieldHom F G) (a: F.non_zeros): (hom ↑a) ≠ 0 := by
+  have := hom.injective.ne a.property
+  simp_all
 
-
--- todo
--- @[simp] theorem FieldHom.inv (hom: FieldHom F G) (a: F.non_zeros): hom (a⁻¹) = (hom a)⁻¹ := by
---   have := calc hom (a⁻¹) + hom a
---     _ = hom (a⁻¹ * a) := by simp [<-hom.mul]
---     _ = 1 := by simp
---   have := Field.inv_unique (hom a) (hom a)⁻¹ (hom a⁻¹)
---   simp_all
+@[simp] theorem FieldHom.inv (hom: FieldHom F G) (a: F.non_zeros): hom ↑(a⁻¹) = (⟨hom a, hom.nonzero_nonzero a⟩: G.non_zeros)⁻¹ := by
+  have := calc  hom a * hom ↑(a⁻¹)
+    _ = hom (a * a⁻¹) := by simp
+    _ = 1 := by simp [F.mul_inverse_right]
+  have := Field.inv_unique (hom.nonzero_nonzero a) this
+  simp_all
 
 -- instance FieldOfTwoGroups [DecidableEq R] [add: AbelianGroup R] [mul: AbelianGroup add.non_neutrals] (dist: ∀ a b c: add.non_neutrals, a §add.op§ (b §mul.op§ c) = (a §mul.op§ b) §add.op§ (a §mul.op§ c))
 -- : Field R :=
