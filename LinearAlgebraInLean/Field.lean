@@ -23,8 +23,8 @@ class CommutativeRing (R: Type) extends Rng R where
 attribute[simp] CommutativeRing.mul_comm
 
 class Field (R : Type) extends CommutativeRing R, R1ng R, Inv (Group.non_zeros toGroup) where
-  mul_inverse_left: ∀ (h: a ≠ 0), (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ * a = 1
-  mul_inverse_right: ∀ (h:a ≠ 0), (a:R) * (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ = 1
+  mul_inverse_left: ∀ {a}, (h: a ≠ 0) -> (⟨a,h⟩: (Group.non_zeros toGroup))⁻¹ * a = 1
+  mul_inverse_right: ∀ {a}, (h: a ≠ 0) -> (a:R) * (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ = 1
   one_is_not_zero : (1: R) ≠ 0
 
 attribute[simp] Field.mul_inverse_left Field.mul_inverse_right Field.one_is_not_zero
