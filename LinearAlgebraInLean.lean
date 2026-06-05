@@ -4,3 +4,4 @@ import LinearAlgebraInLean.Basic
 import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
 import LinearAlgebraInLean.Implementations.Finite
+import LinearAlgebraInLean.Implementations.Rat

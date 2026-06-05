@@ -1,9 +1,9 @@
 import LinearAlgebraInLean.Group
 
 instance IntGroup : AbelianGroup Int := {
-  op := Int.add
-  inv := Int.neg
-  neutral := 0
+  add := Int.add
+  neg := Int.neg
+  zero := 0
   assoc := Int.add_assoc
   neutral_left := Int.zero_add
   neutral_right := Int.add_zero
@@ -20,9 +20,9 @@ instance IntGroup : AbelianGroup Int := {
 }
 
 -- set_option trace.Meta.synthInstance true
-#eval (1: Int) ◾ 2
-#eval (1: IntGroup) ◾ 2⁻¹
-#check IntGroup.Group.non_neutrals
+#eval (1: Int) + 2
+#eval (1: IntGroup) +- 2
+#check IntGroup.non_zeros
 
 def Even (i: Int) := ∃k: Int, 2 * k = i
 
@@ -39,14 +39,14 @@ instance EvenIntGroup : AbelianGroup (Subtype Even) := by
     simp
     exists x - y
     rw [Int.mul_sub]
-    simp [hx, hy, Operation.op, Inv.inv]
+    simp [hx, hy]
     rfl
 
 def tripple := {
   hom:= fun x => 3 * x
-  property := by
+  add := by
     intro a b
-    simp [Operation.op, Int.mul_add]
+    simp [Int.mul_add]
   :GroupHom IntGroup.toGroup IntGroup.toGroup
 }
 

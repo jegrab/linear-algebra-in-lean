@@ -28,11 +28,7 @@ instance [g: Group G]: Std.Associative (α := G) Add.add := ⟨g.assoc⟩
 
 attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.inverse_left Group.inverse_right
 
-namespace Group
 
-theorem a_sub_a_is_zero [Group G] {a : G} : a - a = 0 := by
-  simp [HSub.hSub, Sub.sub]
-end Group
 
 abbrev GroupFromRight [Add G] [Neg G] [Zero G]
 (assoc: ∀ a b c : G , (a + b) + c = a +  (b + c))
@@ -58,87 +54,69 @@ abbrev GroupFromRight [Add G] [Neg G] [Zero G]
       _ = -a + a + -a + a := by grind
       _ = -a + a := by conv => lhs; lhs; rw [assoc, inverse_right, neutral_right]
 
+namespace Group
+variable [G: Group G]
 
-theorem Group.inv_unique [G: Group G] (a: G): unique (fun x => x + a = 0) := by
-  unfold unique
-  simp
-  intro a₁ a₂ h₁ h₂
-  have := calc -a
-    _ = 0 + -a := by simp
-    _ = a₁ + a + -a := by simp [h₁]
-    _ = a₁ := by simp
-  have := calc -a
-    _ = 0 + -a := by simp
-    _ = a₂ + a + -a := by simp [h₂]
-    _ = a₂ := by simp
-  simp_all
+theorem neg_unique {a b: G}: a + b = 0 -> b = -a := by
+  have (a: G): unique (fun x => a + x = 0) := by
+    unfold unique
+    simp
+    intro a₁ a₂ h₁ h₂
+    have := calc -a
+      _ = -a + 0 := by simp
+      _ = -a + (a + a₁)  := by simp [h₁]
+      _ = a₁ := by simp [<-G.assoc]
+    have := calc -a
+      _ = -a + 0 := by simp
+      _ = -a + (a + a₂)  := by simp [h₂]
+      _ = a₂ := by simp [<-G.assoc]
+    simp_all
+  intro h
+  exact (this a b (-a) h (Group.inverse_right a))
 
-@[simp] theorem Group.inv_neutral [G: Group G]: -(0: G) = 0 := by
+@[simp] theorem neg_neutral: -(0: G) = 0 := by
   have : (0:G) + 0 = 0 := by simp
-  have := Group.inv_unique (0: G) 0 (-0) this (Group.inverse_left _)
+  have := Group.neg_unique this
   apply Eq.symm
   assumption
 
-@[simp] theorem Group.inv_inv [G: Group G]: ∀ a: G, - - a = a := by
-  intro a
-  have : a + -a = 0 := by simp
-  have := Group.inv_unique (-a) (- - a) a
-  simp_all
-
-theorem Group.neutral_unique [G: Group G] (a: G) : unique (fun x => x + a = a) := by
-  unfold unique
-  simp
-  intro b₁ b₂ h₁ h₂
-  calc
-    _ = b₁ + 0 := by simp
-    _ = b₁ + a + -a := by simp
-    _ = b₂ +a + -a := by simp[h₁, h₂]
-    _ = b₂ + 0 := by simp
-    _ = b₂ := by simp
-
-
-theorem Group.neutral_unique_right [G: Group G] (a: G) : unique (fun x => a + x = a) := by
-  unfold unique
-  simp
-  intro b₁ b₂ h₁ h₂
-  calc
-    _ = 0 + b₁ := by simp
-    _ = -a + a + b₁ := by simp
-    _ = -a + (a + b₁) := by rw [Group.assoc]
-    _ = -a + (a + b₂) := by simp[h₁, h₂]
-    _ = 0 + b₂ := by simp[<-Group.assoc]
-    _ = b₂ := by simp
-
-theorem Group.eq_zero_of_add_eq_self [G: Group G] {a x: G} (h: x + a = a) : x = 0 := by
-  have g := Group.neutral_unique a x 0 h
-  simp at g
-  exact g
-
-theorem Group.eq_zero_of_add_eq_self_right [G: Group G] {a x: G} (h: a + x = a) : x = 0 := by
-  have g := Group.neutral_unique_right a x 0 h
-  simp at g
-  exact g
-
-theorem Group.remove_both_sides_left [Group G] (x: G) (h: x + a = x + b) : a = b := by
-  have h: -x + (x + a) = -x + (x + b) := by rw[h]
-  rw [<-Group.assoc,<-Group.assoc] at h
-  simp at h
+@[simp] theorem neg_neg {a: G}: - - a = a := by
+  have : -a + a = 0 := by simp
+  have := Group.neg_unique this
+  apply Eq.symm
   assumption
 
-theorem Group.remove_both_sides_right [Group G] (x: G) (h: a + x = b + x) : a = b := by
-  have h: a + x + -x = b + x + -x := by rw[h]
-  simp at h
-  assumption
+theorem neutral_unique {a e: G} : a + e = a -> e = 0 := by
+  have (a: G) : unique (fun x => a + x = a) := by
+    unfold unique
+    simp
+    intro b₁ b₂ h₁ h₂
+    calc b₁
+      _ = -a + a + b₁ := by simp
+      _ = -a + (a + b₁) := by simp [<-Group.assoc]
+      _ = -a + (a + b₂) := by simp[h₁, h₂]
+      _ = (-a + a) + b₂ := by simp [<-Group.assoc]
+      _ = b₂ := by simp
+  intro h
+  apply this a e 0 h (Group.neutral_right _)
 
-theorem Group.move_right [G: Group G] {a b: G} (h: a + b = 0) : a = -b := by
-  apply Group.remove_both_sides_right b
-  simp
-  assumption
 
-theorem Group.move_left [G: Group G] {a b: G} (h: a + b = 0) : b = -a := by
-  apply Group.remove_both_sides_left a
+@[simp] theorem a_sub_a_is_zero {a : G} : a - a = 0 := by
+  simp [HSub.hSub, Sub.sub]
+
+@[simp] theorem sub_is_add_neg{a b: G}: a - b = a + -b := by
+  simp [HSub.hSub, Sub.sub]
+
+@[simp] theorem sub_sum {a b: G}: -(a + b) = -b + -a := by
+  have := calc (a + b) + (-b + -a)
+    _ = a + (b + -b) + -a := by rw[G.assoc]; conv => rhs; rw [G.assoc]; rhs; rw [G.assoc]
+    _ = 0 := by simp
+  exact (Group.neg_unique this).symm
+
+@[simp] theorem sub_sub_swap {a b c: G}: a - (b - c) = a + c - b := by
   simp
-  assumption
+
+end Group
 
 abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
@@ -168,25 +146,25 @@ def closed_nonzero {S: Type} {z: S} (op: operation S) (h: zero_devisor_free op z
       exact hab.imp ((h a b).mpr)
     ⟨op a b, hnz⟩
 
-theorem Group.mulWithInversesRight [g: Group G] {a b : g}  : ∃! x : G, a + x = b := by
-  unfold existsUnique
-  exists -a + b
-  simp
-  apply And.intro
-  have := g.inverse_right
-  simp [<-g.assoc, g.inverse_right, g.neutral_left]
-  intro c hc
-  simp [<-hc, <-g.assoc, g.inverse_left, g.neutral_left]
+-- theorem Group.mulWithInversesRight [g: Group G] {a b : g}  : ∃! x : G, a + x = b := by
+--   unfold existsUnique
+--   exists -a + b
+--   simp
+--   apply And.intro
+--   have := g.inverse_right
+--   simp [<-g.assoc, g.inverse_right, g.neutral_left]
+--   intro c hc
+--   simp [<-hc, <-g.assoc, g.inverse_left, g.neutral_left]
 
 
-theorem mulWithInversesLeft (g: Group G) {a b : G}  : ∃! x : G, x + a = b := by
-  unfold existsUnique
-  exists b + -a
-  simp
-  intro y h
-  have h := congrArg (. + -a) h
-  simp at h
-  simp_all
+-- theorem mulWithInversesLeft (g: Group G) {a b : G}  : ∃! x : G, x + a = b := by
+--   unfold existsUnique
+--   exists b + -a
+--   simp
+--   intro y h
+--   have h := congrArg (. + -a) h
+--   simp at h
+--   simp_all
 
 
 
@@ -264,7 +242,7 @@ instance : CoeFun (GroupHom G H) (λ_ => (G -> H)) where
   have := calc hom (-a) + hom a
     _ = hom (-a + a) := by simp [<-hom.add]
     _ = 0 := by simp
-  have := Group.inv_unique (hom a) (-hom a) (hom (-a))
+  have := Group.neg_unique this
   simp_all
 
 

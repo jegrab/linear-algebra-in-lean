@@ -18,7 +18,7 @@ def ℤ_mod (n: Nat) := Quotient (Cyclic n)
 abbrev ℤ_mod.mk {n: Nat} (a: Int) := Quotient.mk (Cyclic n) a
 
 instance (n: Nat): AbelianGroup (ℤ_mod n) where
-  op := Quotient.lift₂ (fun a b => ℤ_mod.mk (a + b)) <| by
+  add := Quotient.lift₂ (fun a b => ℤ_mod.mk (a + b)) <| by
       intros a₁ b₁ a₂ b₂ ha hb
       simp
       apply Quotient.sound
@@ -27,8 +27,8 @@ instance (n: Nat): AbelianGroup (ℤ_mod n) where
       conv => rhs; tactic => (calc _ = (a₁ + -a₂) + (b₁ + -b₂) := by ac_rfl)
       simp [<-Int.sub_eq_add_neg]
       apply Int.dvd_add <;> assumption
-  neutral := ℤ_mod.mk 0
-  groupInv := Quotient.lift (fun x => ℤ_mod.mk (n - x)) <| by
+  zero := ℤ_mod.mk 0
+  neg := Quotient.lift (fun x => ℤ_mod.mk (n - x)) <| by
       intro a b h
       simp
       apply Quotient.sound
@@ -42,21 +42,27 @@ instance (n: Nat): AbelianGroup (ℤ_mod n) where
   neutral_left := by
     intro a
     induction a using Quotient.ind
+    simp [HAdd.hAdd]
     simp [ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
+    dsimp only [OfNat.ofNat, ℤ_mod.mk, Quotient.mk]
+    simp [Add.add]
+
   neutral_right := by
     intro a
     induction a using Quotient.ind
-    simp [ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
+    simp [HAdd.hAdd, ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
+    dsimp only [OfNat.ofNat, ℤ_mod.mk, Quotient.mk]
+    simp [Add.add]
   inverse_left := by
     intro a
     induction a using Quotient.ind
-    simp [ℤ_mod.mk, Quotient.mk, Quotient.lift₂, Quotient.lift]
+    simp [ℤ_mod.mk, Quotient.mk,  Quotient.lift]
     apply Quotient.sound
     simp [HasEquiv.Equiv, instHasEquivOfSetoid, Setoid.r]
   inverse_right := by
     intro a
     induction a using Quotient.ind
-    simp [Quotient.mk, Quotient.lift₂, Quotient.lift]
+    simp [Quotient.mk, Quotient.lift]
     apply Quotient.sound
     simp [HasEquiv.Equiv, instHasEquivOfSetoid, Setoid.r]
     conv => rhs; rw [Int.sub_eq_add_neg, Int.add_comm, Int.add_assoc]; rhs; rw [Int.add_comm, <-Int.sub_eq_add_neg]
@@ -65,12 +71,12 @@ instance (n: Nat): AbelianGroup (ℤ_mod n) where
     intro a b
     induction a using Quotient.ind
     induction b using Quotient.ind
-    simp [Quotient.mk, Quotient.lift₂, Quotient.lift]
-    simp [Int.add_comm]
+    simp [Quotient.mk, HAdd.hAdd, Quotient.lift₂, Quotient.lift]
+    simp [Add.add, Int.add_comm]
   assoc := by
     intro a b c
     induction a using Quotient.ind
     induction b using Quotient.ind
     induction c using Quotient.ind
-    simp [Quotient.mk, Quotient.lift₂, Quotient.lift]
-    simp [Int.add_assoc]
+    simp [Quotient.mk, HAdd.hAdd, Quotient.lift₂, Quotient.lift]
+    simp [Add.add, Int.add_assoc]
