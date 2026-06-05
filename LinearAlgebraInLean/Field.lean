@@ -27,14 +27,14 @@ variable [Rng R]
   have : a + -a = 0 := by simp
   have : (a + -a)*b = 0*b := congrArg (. * b) this
   have : a *b + -a * b = 0 := by simp[<-distr_left]
-  have : -a * b = -(a * b) := by have := congrArg (- (a * b) + .) this; dsimp at this; rw [<-Group.assoc] at this; simp at this; assumption
+  have : -a * b = -(a * b) := Group.neg_unique this
   assumption
 
 @[simp] theorem put_neg_out_of_mul_right {a b: R}: a*-b = -(a*b) := by
   have : b + -b = 0 := by simp
   have : a*(b + -b) = a*0 := congrArg (a * .) this
   have : a * b + a * -b = 0 := by simp[<-distr_right]
-  have : a * -b = -(a * b) := sorry -- Group.move_left this
+  have : a * -b = -(a * b) := Group.neg_unique this
   assumption
 
 end Rng

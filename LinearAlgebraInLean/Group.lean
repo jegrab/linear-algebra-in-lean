@@ -58,21 +58,16 @@ namespace Group
 variable [G: Group G]
 
 theorem neg_unique {a b: G}: a + b = 0 -> b = -a := by
-  have (a: G): unique (fun x => a + x = 0) := by
-    unfold unique
-    simp
-    intro a₁ a₂ h₁ h₂
-    have := calc -a
-      _ = -a + 0 := by simp
-      _ = -a + (a + a₁)  := by simp [h₁]
-      _ = a₁ := by simp [<-G.assoc]
-    have := calc -a
-      _ = -a + 0 := by simp
-      _ = -a + (a + a₂)  := by simp [h₂]
-      _ = a₂ := by simp [<-G.assoc]
-    simp_all
   intro h
-  exact (this a b (-a) h (Group.inverse_right a))
+  have := congrArg (-a + .) h
+  simp [<-Group.assoc] at this
+  assumption
+
+theorem neg_unique_left {a b: G}: b + a = 0 -> b = -a := by
+  intro h
+  have := congrArg (. + -a) h
+  simp at this
+  assumption
 
 @[simp] theorem neg_neutral: -(0: G) = 0 := by
   have : (0:G) + 0 = 0 := by simp
