@@ -1,6 +1,8 @@
 import LinearAlgebraInLean.Infix
 import LinearAlgebraInLean.Util
 
+namespace LA
+
 abbrev neutral_pred (op : G -> G -> G) (n : G) := ∀ a : G, (op a n = a ∧ op n a = a)
 
 theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b :=

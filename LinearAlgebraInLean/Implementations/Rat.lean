@@ -1,5 +1,6 @@
 import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
+namespace LA
 open Group
 
 instance RatAddGroup : AbelianGroup Rat where
@@ -93,7 +94,7 @@ instance RatMulGroup : AbelianGroup { x : Rat // x ≠ 0} where
 example (G: Group G) :  (0: G) + 0 = 0 := by
   apply Group.neutral_left
 
-theorem Rat.inv_zero_iff_zero {a: Rat}: a⁻¹ = 0 ↔ a = 0 := by
+theorem _root_.Rat.inv_zero_iff_zero {a: Rat}: a⁻¹ = 0 ↔ a = 0 := by
   constructor
   . simp [Rat.inv_def]
     intro h

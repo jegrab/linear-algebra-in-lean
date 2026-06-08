@@ -8,3 +8,7 @@ name = "LinearAlgebraInLean"
 [[lean_exe]]
 name = "linear-algebra-in-lean"
 root = "Main"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"

@@ -1,6 +1,7 @@
 import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Util
 
+namespace LA
 
 class Rng (R: Type) extends AbelianGroup R, Mul R where
   mul_assoc: ∀ a b c: R, a * b * c = a * (b * c)

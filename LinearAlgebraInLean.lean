@@ -1,7 +1,10 @@
--- This module serves as the root of the `LinearAlgebraInLean` library.
--- Import modules here that should be built as part of the library.
 import LinearAlgebraInLean.Basic
-import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
+import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Implementations.Finite
+import LinearAlgebraInLean.Implementations.Int
 import LinearAlgebraInLean.Implementations.Rat
+import LinearAlgebraInLean.Infix
+import LinearAlgebraInLean.Sum
+import LinearAlgebraInLean.Util
+import LinearAlgebraInLean.VectorSpace

@@ -1,5 +1,7 @@
 import LinearAlgebraInLean.Group
 
+namespace LA
+
 instance IntGroup : AbelianGroup Int := {
   add := Int.add
   neg := Int.neg

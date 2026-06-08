@@ -1,4 +1,5 @@
 import LinearAlgebraInLean.Group
+namespace LA
 
 def sum [Add t] [Zero t] (indices: List α) (values: α -> t) : t :=
   match indices with
