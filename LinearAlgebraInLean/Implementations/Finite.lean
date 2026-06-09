@@ -161,7 +161,15 @@ instance Finite(n: Nat) (hp: Prime n): Field (ℤ_mod n) where
       have gcd_c: c * c.gcdA n = 1 - n * c.gcdB n := by lia
 
       suffices ↑n ∣ c * (b * b.gcdA n) - b * (c * c.gcdA n) by
-        sorry -- use that b * c are coprime to n
+        conv at this => rhs; lhs; rw [<-Int.mul_assoc]; (conv => lhs; rw [Int.mul_comm]); rw [Int.mul_assoc]
+        simp [<-Int.mul_sub] at this
+        apply Int.dvd_of_dvd_mul_right_of_gcd_one
+        apply Int.dvd_of_dvd_mul_right_of_gcd_one
+        assumption
+        have : ¬ n ∣ b.natAbs := by rwa [<-Int.natCast_dvd_natCast, Int.dvd_natAbs]
+        apply (Nat.Prime.coprime_iff_not_dvd hp.nat_prime).mpr this
+        have : ¬ n ∣ c.natAbs := by rwa [<-Int.natCast_dvd_natCast, Int.dvd_natAbs]
+        apply (Nat.Prime.coprime_iff_not_dvd hp.nat_prime).mpr this
 
       rw [gcd_b, gcd_c]
       conv => (rhs; tactic => calc _ = c - b + n * (b * c.gcdB n - c * b.gcdB n) := by simp[Int.sub_eq_add_neg, Int.mul_add, Int.mul_neg]; ac_nf; simp[<-Int.add_assoc]; ac_nf; congr 1; simp [Int.add_comm])
