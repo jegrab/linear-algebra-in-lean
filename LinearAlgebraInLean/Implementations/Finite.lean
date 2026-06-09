@@ -99,10 +99,28 @@ instance CyclicGroup (n: Nat): AbelianGroup (ℤ_mod n) where
     simp [Quotient.mk, HAdd.hAdd, Quotient.lift₂, Quotient.lift]
     simp [Add.add, Int.add_assoc]
 
-theorem ℤ_mod.zero_iff {n: Nat} [G: Group $ ℤ_mod n] (a: Int): ℤ_mod.mk a = (0: G) ↔ ↑n ∣ a := by
-  sorry
+theorem ℤ_mod.zero_iff {n: Nat} (a: Int): ℤ_mod.mk a = (0: CyclicGroup n) ↔ ↑n ∣ a := by
+  simp [OfNat.ofNat]
+  unfold Zero.zero
+  unfold CyclicGroup
+  simp [Group.toZero]
+  unfold mk
+  constructor
+  . intro h
+    have := Quotient.exact h
+    simp [HasEquiv.Equiv, instHasEquivOfSetoid] at this
+    unfold Cyclic at this
+    simp [Setoid.r] at this
+    assumption
+  . intro h
+    apply Quotient.sound
+    simp [HasEquiv.Equiv, instHasEquivOfSetoid]
+    unfold Cyclic
+    simp [Setoid.r]
+    assumption
 
-instance Finite(n: Nat) (hp: Prime n): Field (ℤ_mod n) where
+
+@[reducible] def Finite(n: Nat) (hp: Prime n): Field (ℤ_mod n) where
   one := ℤ_mod.mk 1
   mul := Quotient.lift₂ (fun a b => ℤ_mod.mk (a * b))  <| by
     intro a₁ b₁ a₂ b₂ ha hb
