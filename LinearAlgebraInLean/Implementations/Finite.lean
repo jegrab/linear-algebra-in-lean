@@ -20,11 +20,11 @@ def Cyclic (n: Nat): Setoid Int where
       assumption
   }
 
--- instance instDecidableCyclic (n: Nat) (k r: Int): Decidable ((@instHasEquivOfSetoid _ (Cyclic n)).Equiv k r) := by
---   simp [HasEquiv.Equiv, instHasEquivOfSetoid]
---   unfold Setoid.r
---   simp [Cyclic]
---   apply Int.decidableDvd
+instance instDecidableCyclic (n: Nat) (k r: Int): Decidable ((@instHasEquivOfSetoid _ (Cyclic n)).Equiv k r) := by
+  simp [HasEquiv.Equiv, instHasEquivOfSetoid]
+  unfold Setoid.r
+  simp [Cyclic]
+  apply Int.decidableDvd
 
 
 def ℤ_mod (n: Nat) := Quotient (Cyclic n)
@@ -195,14 +195,40 @@ theorem ℤ_mod.zero_iff {n: Nat} (a: Int): ℤ_mod.mk a = (0: CyclicGroup n) �
       . apply Int.dvd_neg.mp; simp; assumption
       . apply Int.dvd_mul_right
 
+    simp
+    cases a using Quotient.ind
+    rename_i a
+    unfold Quotient.hrecOn
+    unfold Quotient.mk
+    unfold Quotient
+    unfold Quot.hrecOn
+    unfold Quot.recOn
+    unfold Quot.rec
+    simp
+    simp [OfNat.ofNat]
+    simp [Zero.zero]
+    unfold ℤ_mod.mk
+    intro h
+    have := Quotient.exact h
+    simp [OfNat.ofNat] at ha
+    simp [Zero.zero, ℤ_mod.mk] at ha
+    have ha := Decidable.not_imp_not.mpr Quotient.sound ha
+    simp [HasEquiv.Equiv, instHasEquivOfSetoid] at this ha
+    unfold Setoid.r at this ha
+    unfold Cyclic at this ha
+    simp at this ha
+    have : n ∣ a.gcd n := by
+      rw [Int.dvd_def] at this
+      obtain ⟨c, hc⟩ := this
+      have := Int.gcd_eq_gcd_ab a n
+      rw [hc] at this
+      rw [<-Int.mul_assoc] at this
+      conv at this => rhs; lhs; lhs; rw [Int.mul_comm]
+      conv at this => rhs; lhs; rw [Int.mul_assoc]
+      rw [<-Int.mul_add] at this
+      apply Int.natCast_dvd_natCast.mp
+      rw [this]
+      apply Int.dvd_mul_right
+    have := (Int.dvd_gcd_iff.mp this).1
+    contradiction
 
-
-
-
-
-
-
-
-
-
-    sorry
