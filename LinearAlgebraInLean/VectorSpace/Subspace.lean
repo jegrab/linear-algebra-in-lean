@@ -1,0 +1,108 @@
+import LinearAlgebraInLean.VectorSpace.Def
+import LinearAlgebraInLean.VectorSpace.LinearMap
+namespace LA
+
+
+class Subspace (V: VectorSpace F V) (pred: V -> Prop) extends VectorSpace F (Subtype pred) where
+  criterion ::
+  add_is_add: ∀ x y: Subtype pred, (↑(x + y): V) = ↑x + ↑y
+  smul_is_smul: ∀ (μ : F) (v: Subtype pred), (↑(μ • v): V) = μ • ↑v
+
+attribute[simp] Subspace.add_is_add
+
+instance : CoeSort (Subspace V pred) Type where
+  coe _ := Subtype pred
+
+namespace Subspace
+variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} [U: Subspace V pred]
+
+@[reducible] def mk {pred: V -> Prop}
+  (inh: Inhabited $ Subtype pred)
+  (closed: ∀ (u v: Subtype pred) (μ: F), pred $ μ • u + v)
+  : Subspace V pred :=
+  let subgroup := AbelianSubGroup pred inh <| by
+    intro a b
+    have := closed b a (-1)
+    simp [AbelianGroup.comm, VectorSpace.smul_minus] at this
+    apply this
+  let smul μ v := by
+      exists μ • v
+      have h := closed v 0 μ
+      simp [OfNat.ofNat, Zero.zero, subgroup] at h
+      have : V.zero = (0: V) := by unfold OfNat.ofNat; unfold Zero.toOfNat0; simp
+      rw [this] at h
+      simp at h
+      assumption
+  {
+    toAbelianGroup := subgroup
+    smul := smul
+    one_mul  := by
+      intro ⟨v, hv⟩
+      simp [HSMul.hSMul, smul]
+      apply V.one_mul
+    s_assoc := by
+      intro μ γ ⟨c, hc⟩
+      simp [HSMul.hSMul, smul]
+      apply V.s_assoc
+    s_distr_left := by
+      intro μ γ ⟨v ,hv⟩
+      simp [HSMul.hSMul, smul, HAdd.hAdd, subgroup, Add.add]
+      apply V.s_distr_left
+    s_distr_right := by
+      intro μ ⟨u, hu⟩ ⟨v ,hv⟩
+      simp [HSMul.hSMul, smul, HAdd.hAdd, subgroup, Add.add]
+      apply V.s_distr_right
+    add_is_add := by simp [subgroup, HAdd.hAdd, Add.add]
+    smul_is_smul := by simp [smul, HSMul.hSMul, SMul.smul]
+  }
+
+
+def embed (U: Subspace V pred): LinearMap U.toVectorSpace V :=
+  let hom x := ↑x
+  {
+    hom := hom
+    add := U.add_is_add
+    scalar := U.smul_is_smul
+  }
+
+@[reducible] def zero_subspace: Subspace V (. = (0: V)) := by
+  apply Subspace.mk
+  . apply Inhabited.mk
+    exists 0
+  . intro ⟨u, hu⟩ ⟨v, hv⟩ μ
+    simp [hu, hv]
+
+def zero_in_subspace (U: Subspace V pred): pred 0 := by
+  have h := (0: U).property
+  have : (0: U) = (0: V) := by
+    rw [<-U.embed.zero]
+    unfold embed
+    simp
+  rw [this] at h
+  assumption
+
+
+
+
+
+
+@[reducible] def intersect {pred_v pred_u : V -> Prop} (U: Subspace V pred_v) (S: Subspace V pred_u) : Subspace V $ fun (x : V) => pred_v x ∧ pred_u x := by
+  apply Subspace.mk
+  . apply Inhabited.mk
+    exists 0
+    constructor <;> apply zero_in_subspace
+    all_goals assumption
+  . intro ⟨u, hu⟩ ⟨v, hv⟩ μ
+    constructor
+    have := (μ • (⟨u, hu.1⟩: Subtype pred_v) + ⟨v, hv.1⟩).property
+    have hom : ∀x, U.embed.hom x = ↑x := by simp [Subspace.embed]
+    rw [<-hom, U.embed.add, U.embed.scalar] at this
+    assumption
+    have := (μ • (⟨u, hu.2⟩: Subtype pred_u) + ⟨v, hv.2⟩).property
+    have hom : ∀x, S.embed.hom x = ↑x := by simp [Subspace.embed]
+    rw [<-hom, S.embed.add, S.embed.scalar] at this
+    assumption
+
+instance : Inter $ Sigma (Subspace V .) where
+  inter a b := Sigma.mk _ $ a.snd.intersect b.snd
+-- there is no heterogenous intersection. Like this, it's probably not that useful

@@ -15,7 +15,7 @@ instance : CoeSort (VectorSpace K V) Type where
 
 
 namespace VectorSpace
-variable [F: Field F] [V: VectorSpace F V]
+variable {F V} [F: Field F] [V: VectorSpace F V]
 
 @[simp] theorem smul_zero_right  (r : F) : r • (0: V) = 0 := by
   have h : r • (0 + (0:V)) = r • 0 + r • 0 := by rw [<-s_distr_right]
@@ -101,52 +101,6 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq α][LawfulBEq α]
     simp
   . rw [List.contains_eq_mem]
     simpa using h2
-
-@[reducible] def SubSpace (pred: V -> Prop)
-  (inh: Inhabited $ Subtype pred)
-  (closed: ∀ (u v: Subtype pred) (μ: F), pred $ μ • u + v)
-  : VectorSpace F (Subtype pred) :=
-  let subgroup := AbelianSubGroup pred inh <| by
-    intro a b
-    have := closed b a (-1)
-    simp [AbelianGroup.comm, smul_minus] at this
-    apply this
-  let smul μ v := by
-      exists μ • v
-      have h := closed v 0 μ
-      simp [OfNat.ofNat, Zero.zero, subgroup] at h
-      have : V.zero = (0: V) := by unfold OfNat.ofNat; unfold Zero.toOfNat0; simp
-      rw [this] at h
-      simp at h
-      assumption
-  {
-    toAbelianGroup := subgroup
-    smul := smul
-    one_mul  := by
-      intro ⟨v, hv⟩
-      simp [HSMul.hSMul, smul]
-      apply V.one_mul
-    s_assoc := by
-      intro μ γ ⟨c, hc⟩
-      simp [HSMul.hSMul, smul]
-      apply V.s_assoc
-    s_distr_left := by
-      intro μ γ ⟨v ,hv⟩
-      simp [HSMul.hSMul, smul, HAdd.hAdd, subgroup, Add.add]
-      apply V.s_distr_left
-    s_distr_right := by
-      intro μ ⟨u, hu⟩ ⟨v ,hv⟩
-      simp [HSMul.hSMul, smul, HAdd.hAdd, subgroup, Add.add]
-      apply V.s_distr_right
-  }
-
-
-@[reducible] def zero_subspace: VectorSpace F $ Subtype $ (. = (0: V)) := by
-  apply SubSpace
-  . apply Inhabited.mk
-    exists 0
-  . intro ⟨u, hu⟩ ⟨v, hv⟩ μ
-    simp [hu, hv]
 
 
 
