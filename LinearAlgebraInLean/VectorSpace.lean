@@ -61,7 +61,7 @@ variable [F: Field F] [V: VectorSpace F V]
 
 def linear_independent (F: Field F) (V: VectorSpace F V) (is: List α) (vs: α -> V) : Prop := ∀ (ls: α -> F), sum is (fun i => ls i • vs i) = 0 -> ∀ i ∈ is, ls i = 0
 
-theorem v_is_lincomb_of_others_from_lin_dep [BEq α]
+theorem v_is_lincomb_of_others_from_lin_dep [BEq α][LawfulBEq α]
         (is: List α) (vs: α -> V) (hl : ¬ linear_independent F V is vs) :
         ∃ i ∈ is, ∃ (ys: α -> F), vs i = sum (is.erase i) (fun j => ys j • vs j) := by
   unfold linear_independent at hl
@@ -88,11 +88,18 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq α]
       _ = (1:F) • vs i1 := by simp
       _ = (x1⁻¹.val * x1.val) • vs i1 := by rw[h_one]
       _ = x1⁻¹.val • x1.val • vs i1 := by simp
-      _ = x1⁻¹.val • sum [i1] (fun j => xs j • vs j) := by sorry
+      _ = x1⁻¹.val • sum [i1] (fun j => xs j • vs j) := by
+        unfold sum
+        unfold sum
+        unfold x1
+        simp
   rw [h]
   rw [<-s_distr_right]
   rw [Sum.split]
-  sorry
-
+  rw [Sum.erase_then_add]
+  . rw [h1]
+    simp
+  . rw [List.contains_eq_mem]
+    simpa using h2
 
 end VectorSpace
