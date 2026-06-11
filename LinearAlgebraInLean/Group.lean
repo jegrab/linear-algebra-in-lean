@@ -163,11 +163,13 @@ def closed_nonzero {S: Type} {z: S} (op: operation S) (h: zero_devisor_free op z
 
 
 
-abbrev SubGroup [G: Group G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a + -b)):
+abbrev SubGroup [G: Group G] (prop: G -> Prop) (inh: Nonempty (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a + -b)):
 Group (Subtype prop) :=
   let neutral : Subtype prop := by
     exists 0
-    have := closed inh.default inh.default
+    cases inh
+    rename_i inh
+    have := closed inh inh
     simp_all
   let inv : Subtype prop -> Subtype prop := by
       intro ⟨a, ha⟩
@@ -204,7 +206,7 @@ Group (Subtype prop) :=
       simp [add, inv, OfNat.ofNat, neutral]
   }
 
-abbrev AbelianSubGroup [G: AbelianGroup G] (prop: G -> Prop) (inh: Inhabited (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a + (-b))):
+abbrev AbelianSubGroup [G: AbelianGroup G] (prop: G -> Prop) (inh: Nonempty (Subtype prop)) (closed: ∀ a b : Subtype prop, prop (a + (-b))):
 AbelianGroup (Subtype prop) := {
   toGroup := SubGroup prop inh closed
   comm := by

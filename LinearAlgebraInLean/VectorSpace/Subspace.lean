@@ -4,7 +4,7 @@ namespace LA
 
 
 class Subspace (V: VectorSpace F V) where
-  criterion ::
+  from_def ::
   pred: V -> Prop
   toVectorSpace: VectorSpace F (Subtype pred)
   add_is_add: ∀ x y: Subtype pred, (↑(x + y): V) = ↑x + ↑y
@@ -26,7 +26,7 @@ variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} [U: Subspace
 #check U.toVectorSpace.zero
 
 @[reducible] def mk (pred: V -> Prop)
-  (inh: Inhabited $ Subtype pred)
+  (inh: Nonempty $ Subtype pred)
   (closed: ∀ (u v: Subtype pred) (μ: F), pred $ μ • u + v)
   : Subspace V :=
   let subgroup := AbelianSubGroup pred inh <| by
@@ -79,7 +79,7 @@ def embed (U: Subspace V): LinearMap U.toVectorSpace V :=
 
 @[reducible] def zero_subspace: Subspace V := by
   apply Subspace.mk (. = (0: V))
-  . apply Inhabited.mk
+  . constructor
     exists 0
   . intro ⟨u, hu⟩ ⟨v, hv⟩ μ
     simp [hu, hv]
@@ -100,7 +100,7 @@ def zero_in_subspace (U: Subspace V): U.pred 0 := by
 
 @[reducible] def intersect (U S: Subspace V) : Subspace V := by
   apply Subspace.mk (fun x => U.pred x ∧ S.pred x)
-  . apply Inhabited.mk
+  . constructor
     exists 0
     constructor <;> apply zero_in_subspace
     all_goals assumption
@@ -120,7 +120,7 @@ instance : Inter $ Subspace V where
 
 @[reducible] def sum (U S: Subspace V) : Subspace V := by
   apply Subspace.mk (fun x => ∃u: V, U.pred u ∧ S.pred (x - u))
-  . apply Inhabited.mk
+  . constructor
     exists 0
     exists 0
     constructor <;> (try simp) <;> apply zero_in_subspace
@@ -142,3 +142,14 @@ instance : Inter $ Subspace V where
 
 instance : Add $ Subspace V where
   add := sum
+
+
+namespace _root_.LA.VectorSpace.LinearMap
+
+@[reducible] def kernel (φ: LinearMap V W) : Subspace V := by
+  apply Subspace.mk (fun x => φ x = 0)
+  . constructor
+    exists 0
+    apply φ.zero
+  . intro u v μ
+    simp [u.property, v.property]
