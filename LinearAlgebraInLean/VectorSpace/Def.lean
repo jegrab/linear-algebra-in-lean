@@ -29,11 +29,17 @@ variable {F V} [F: Field F] [V: VectorSpace F V]
           _ = v + (0:F) • v := by simp
   apply Group.neutral_unique this.symm
 
-@[simp] theorem smul_minus (x: F) (v : V) : (-x • v) = - (x•v) := by
+@[simp] theorem smul_minus_left (x: F) (v : V) : (-x • v) = - (x•v) := by
   have : (0:F)•v = 0 := by simp
   have : (-x + x)•v = 0 := by simp
   have : -x • v + x • v = 0 := by rw[<-s_distr_left, this]
   apply Group.neg_unique_left this
+
+@[simp] theorem smul_minus_right (x: F) (v : V) : (x • -v) = - (x•v) := by
+  have := calc x • v + x • -v
+    _ = x • (v + -v) := by simp [<-VectorSpace.s_distr_right]
+    _ = 0 := by simp
+  apply Group.neg_unique this
 
 @[simp] theorem zero_div_free (r : F) (v : V) (h: r • v = 0) : r = 0 ∨ v = 0 := by
   by_cases hr: r = 0
@@ -77,7 +83,7 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq α][LawfulBEq α]
     _ = sum (is.erase i1) fun j => (-x1⁻¹.val * xs j) • vs j := by simp[ys]
     _ = sum (is.erase i1) fun j => -x1⁻¹.val • xs j • vs j := by simp
     _ = -x1⁻¹.val • sum (is.erase i1) fun j => xs j • vs j := by rw[sum_distr]
-    _ =-(x1⁻¹.val • sum (is.erase i1) fun j => xs j • vs j) := by rw [smul_minus]
+    _ =-(x1⁻¹.val • sum (is.erase i1) fun j => xs j • vs j) := by rw [smul_minus_left]
   rw [h]
   apply Group.neg_unique
   have h_one : x1⁻¹.val * x1.val = 1 := by

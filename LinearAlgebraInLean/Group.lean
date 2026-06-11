@@ -24,7 +24,7 @@ instance [Group G] : Sub G where
 instance: CoeSort (Group G) (Type) where
   coe _ := G
 
-instance [g: Group G]: Std.Associative (α := G) Add.add := ⟨g.assoc⟩
+instance [g: Group G]: Std.Associative (α := G) (. + .) := ⟨g.assoc⟩
 
 attribute [simp] Group.assoc Group.neutral_right Group.neutral_left Group.inverse_left Group.inverse_right
 
@@ -124,7 +124,7 @@ attribute [simp] AbelianGroup.comm
 instance : CoeSort (AbelianGroup G) (Type) where
   coe _ := G
 
-instance [g: AbelianGroup G]: Std.Commutative (α := G) Add.add := ⟨g.comm⟩
+instance [g: AbelianGroup G]: Std.Commutative (α := G) (. + .) := ⟨g.comm⟩
 
 abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
 

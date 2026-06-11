@@ -4,8 +4,9 @@ import LinearAlgebraInLean.Util
 
 class Rng (R: Type) extends AbelianGroup R, Mul R where
   mul_assoc: ∀ a b c: R, a * b * c = a * (b * c)
-  distr_right : ∀ a b c : R , a  * (b + c) = (a * b) + (a * c)
+  distr_right : ∀ a b c : R , a * (b + c) = (a * b) + (a * c)
   distr_left : ∀ a b c : R , (b + c) * a = (b * a) + (c * a)
+  -- todo flip all theorems, the left side is the more simple one!
 
 namespace Rng
 variable [Rng R]

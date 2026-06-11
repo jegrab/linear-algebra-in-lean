@@ -32,7 +32,7 @@ variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} [U: Subspace
   let subgroup := AbelianSubGroup pred inh <| by
     intro a b
     have := closed b a (-1)
-    simp [AbelianGroup.comm, VectorSpace.smul_minus] at this
+    simp [AbelianGroup.comm, VectorSpace.smul_minus_left] at this
     apply this
   let smul μ v := by
       exists μ • v
@@ -98,7 +98,7 @@ def zero_in_subspace (U: Subspace V): U.pred 0 := by
 
 
 
-@[reducible] def intersect (U: Subspace V) (S: Subspace V) : Subspace V := by
+@[reducible] def intersect (U S: Subspace V) : Subspace V := by
   apply Subspace.mk (fun x => U.pred x ∧ S.pred x)
   . apply Inhabited.mk
     exists 0
@@ -117,3 +117,28 @@ def zero_in_subspace (U: Subspace V): U.pred 0 := by
 
 instance : Inter $ Subspace V where
   inter := intersect
+
+@[reducible] def sum (U S: Subspace V) : Subspace V := by
+  apply Subspace.mk (fun x => ∃u: V, U.pred u ∧ S.pred (x - u))
+  . apply Inhabited.mk
+    exists 0
+    exists 0
+    constructor <;> (try simp) <;> apply zero_in_subspace
+  . intro ⟨u, hu⟩ ⟨v, hv⟩ μ
+    obtain ⟨u₁, hu₁⟩ := hu
+    obtain ⟨v₁, hv₁⟩ := hv
+    exists μ • u₁ + v₁
+    constructor
+    . let := (μ • (⟨u₁, hu₁.left⟩: U) + ⟨v₁, hv₁.left⟩).property
+      simp [U.add_is_add, U.smul_is_smul] at this
+      rw [AbelianGroup.comm] at this
+      apply this
+    . simp
+      let := ((⟨v - v₁, hv₁.right⟩ : S) + μ • ⟨u - u₁, hu₁.right⟩).property
+      simp [S.smul_is_smul, S.add_is_add] at this
+      conv => rhs; tactic => ac_nf
+      conv at this => rhs; tactic => ac_nf
+      assumption
+
+instance : Add $ Subspace V where
+  add := sum
