@@ -5,6 +5,8 @@ macro "∃!" v:ident " : " t:term ", " b:term : term =>
 
 abbrev unique (pred: α -> Prop) := ∀ a b, pred a -> pred b -> a = b
 
+theorem Zero.zero_is_zero [Zero X]: Zero.zero = (0: X) := by
+  simp [OfNat.ofNat]
 
 notation "(" x:10 "//" y ")" => (⟨x, y⟩ : Subtype _)
 

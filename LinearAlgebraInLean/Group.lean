@@ -228,6 +228,14 @@ instance : CoeFun (GroupHom G H) (λ_ => (G -> H)) where
   coe hom := hom.hom
 
 
+def GroupHom.ext {f g: GroupHom G H}: (∀ x, f x = g x) → f = g := by
+  intro h
+  cases f <;> cases g
+  simp at *
+  funext
+  apply h
+
+
 @[simp] theorem GroupHom.zero (hom: GroupHom G H): hom 0 = 0 := by
   apply Eq.symm
   calc 0
