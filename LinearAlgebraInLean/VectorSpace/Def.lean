@@ -1,6 +1,7 @@
 import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
 import LinearAlgebraInLean.Sum
+import LinearAlgebraInLean.VectorSpace.Tactics
 
 class VectorSpace (F: Field F) (V : Type) extends AbelianGroup V, SMul F V where
   one_mul : ∀ v: V, (1:F) • v = v

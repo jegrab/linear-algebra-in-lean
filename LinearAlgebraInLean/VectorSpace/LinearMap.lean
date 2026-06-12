@@ -1,4 +1,5 @@
 import LinearAlgebraInLean.VectorSpace.Def
+import LinearAlgebraInLean.VectorSpace.Tactics
 
 namespace LA
 
@@ -45,139 +46,51 @@ def chain (φ: LinearMap W X) (ψ: LinearMap V W): LinearMap V X := by
   apply mk (φ ∘ ψ)
   simp
 
+
+
 instance FunVectorSpace (X: Type) (Y: VectorSpace F Y): VectorSpace F $ X -> Y where
   add a b x := a x + b x
   smul μ a x := μ • a x
   neg a x :=  - a x
   zero x :=  0
-  assoc := by
-    intros
-    funext
-    dsimp [HAdd.hAdd]
-    dsimp [Add.add_eq_hAdd]
-    ac_nf
-  neutral_left := by
-    intros
-    funext
-    dsimp [HAdd.hAdd, OfNat.ofNat]
-    dsimp [Add.add_eq_hAdd]
-    simp [Zero.zero_is_ofNat]
-  neutral_right := by
-    intros
-    funext
-    dsimp [HAdd.hAdd, OfNat.ofNat]
-    dsimp [Add.add_eq_hAdd]
-    simp [Zero.zero_is_ofNat]
-  inverse_left := by
-    intros
-    funext
-    dsimp [HAdd.hAdd, OfNat.ofNat]
-    simp [Add.add_eq_hAdd, Zero.zero_is_ofNat]
-  inverse_right := by
-    intros
-    funext
-    dsimp [HAdd.hAdd, OfNat.ofNat]
-    simp [Add.add_eq_hAdd, Zero.zero_is_ofNat]
-  comm := by
-    intros
-    funext
-    dsimp [HAdd.hAdd, OfNat.ofNat]
-    simp [Add.add_eq_hAdd]
-  one_mul := by
-    intros
-    funext
-    dsimp [HSMul.hSMul, OfNat.ofNat]
-    simp [SMul.smul_eq_hSMul, One.one_is_ofNat]
-  s_assoc := by
-    intros
-    funext
-    dsimp [HSMul.hSMul]
-    simp [SMul.smul_eq_hSMul]
-  s_distr_left := by
-    intros
-    funext
-    simp [HSMul.hSMul, HAdd.hAdd]
-    simp [Add.add_eq_hAdd, SMul.smul_eq_hSMul]
-  s_distr_right := by
-    intros
-    funext
-    simp [HSMul.hSMul, HAdd.hAdd]
-    simp [Add.add_eq_hAdd, SMul.smul_eq_hSMul]
+  assoc := by vector_space_refold; intros; ac_nf
+  neutral_left := by vector_space_refold
+  neutral_right := by vector_space_refold
+  inverse_left := by vector_space_refold
+  inverse_right := by vector_space_refold
+  comm := by vector_space_refold
+  one_mul := by vector_space_refold
+  s_assoc := by vector_space_refold
+  s_distr_left := by vector_space_refold
+  s_distr_right := by vector_space_refold
 
 instance: VectorSpace F $ LinearMap V W :=
   let := FunVectorSpace V W
   {
     add a b := by
       apply LinearMap.mk $ a.hom + b.hom
-      intros
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd]
-      ac_nf
+      vector_space_refold [this]
+      intros; ac_nf
     smul μ a := by
       apply LinearMap.mk $ μ • a.hom
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd]
+      vector_space_refold [this]
     neg a := by
-      apply LinearMap.mk $ fun x => - a x
-      simp
+      apply LinearMap.mk $ - a.hom
+      vector_space_refold [this]
     zero := by
-      apply LinearMap.mk $ fun _ => 0
-      simp
-    assoc := by
-      intros
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd]
-    neutral_left := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat]
-    neutral_right := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat]
-    inverse_left := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat]
-    inverse_right := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat]
-    comm := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat]
-    one_mul := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat, One.one_is_ofNat]
-    s_assoc := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat, One.one_is_ofNat]
-
-    s_distr_left := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat, One.one_is_ofNat]
-    s_distr_right := by
-      intros
-      apply ext
-      dsimp [HAdd.hAdd, HSMul.hSMul, Add.add, this, SMul.smul, mk, OfNat.ofNat]
-      simp [SMul.smul_eq_hSMul, Add.add_eq_hAdd, Zero.zero_is_ofNat, One.one_is_ofNat]
-
+      apply LinearMap.mk $ 0
+      vector_space_refold [this]
+    assoc := by vector_space_refold [this]
+    neutral_left := by vector_space_refold [this]
+    neutral_right := by vector_space_refold [this]
+    inverse_left := by vector_space_refold [this]
+    inverse_right :=by vector_space_refold [this]
+    comm := by vector_space_refold [this]
+    one_mul := by vector_space_refold [this]
+    s_assoc := by vector_space_refold [this]
+    s_distr_left := by vector_space_refold [this]
+    s_distr_right := by vector_space_refold [this]
   }
-
-
-
 
 
 
