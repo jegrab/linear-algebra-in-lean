@@ -53,16 +53,6 @@ instance FunVectorSpace (X: Type) (Y: VectorSpace F Y): VectorSpace F $ X -> Y w
   smul μ a x := μ • a x
   neg a x :=  - a x
   zero x :=  0
-  assoc := by vector_space_refold; intros; ac_nf
-  neutral_left := by vector_space_refold
-  neutral_right := by vector_space_refold
-  inverse_left := by vector_space_refold
-  inverse_right := by vector_space_refold
-  comm := by vector_space_refold
-  one_mul := by vector_space_refold
-  s_assoc := by vector_space_refold
-  s_distr_left := by vector_space_refold
-  s_distr_right := by vector_space_refold
 
 instance: VectorSpace F $ LinearMap V W :=
   let := FunVectorSpace V W
@@ -80,16 +70,6 @@ instance: VectorSpace F $ LinearMap V W :=
     zero := by
       apply LinearMap.mk $ 0
       vector_space_refold [this]
-    assoc := by vector_space_refold [this]
-    neutral_left := by vector_space_refold [this]
-    neutral_right := by vector_space_refold [this]
-    inverse_left := by vector_space_refold [this]
-    inverse_right :=by vector_space_refold [this]
-    comm := by vector_space_refold [this]
-    one_mul := by vector_space_refold [this]
-    s_assoc := by vector_space_refold [this]
-    s_distr_left := by vector_space_refold [this]
-    s_distr_right := by vector_space_refold [this]
   }
 
 

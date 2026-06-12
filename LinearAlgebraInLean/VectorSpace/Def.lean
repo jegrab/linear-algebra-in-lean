@@ -4,10 +4,10 @@ import LinearAlgebraInLean.Sum
 import LinearAlgebraInLean.VectorSpace.Tactics
 
 class VectorSpace (F: Field F) (V : Type) extends AbelianGroup V, SMul F V where
-  one_mul : ∀ v: V, (1:F) • v = v
-  s_assoc : ∀ (r s: F) (v : V), r • (s • v) = (r * s) • v
-  s_distr_left : ∀ (r s : F) (v : V), (r+s)•v = (r•v) + (s•v)
-  s_distr_right : ∀ (r: F) (v w : V), r•(v+w) = (r•v) + (r•w)
+  one_mul : ∀ v: V, (1:F) • v = v := by vector_space_refold
+  s_assoc : ∀ (r s: F) (v : V), r • (s • v) = (r * s) • v := by vector_space_refold
+  s_distr_left : ∀ (r s : F) (v : V), (r+s)•v = (r•v) + (s•v) := by vector_space_refold
+  s_distr_right : ∀ (r: F) (v w : V), r•(v+w) = (r•v) + (r•w) := by vector_space_refold
 
 attribute[simp] VectorSpace.one_mul VectorSpace.s_assoc VectorSpace.s_distr_left VectorSpace.s_distr_right
 

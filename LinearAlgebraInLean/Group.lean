@@ -11,12 +11,22 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
 
 abbrev operation (G: Type u): Type u:= G -> G -> G
 
+
+syntax  "group_refold" (" [" Lean.Parser.Tactic.simpLemma,*,? "]")? : tactic
+macro_rules
+  | `(tactic|group_refold [$lma,*]) => `(tactic|
+      dsimp [HAdd.hAdd, Add.add, OfNat.ofNat, Neg.neg, Zero.zero, $lma,*];
+      simp [Add.add_eq_hAdd, Zero.zero_is_ofNat, One.one_is_ofNat])
+  | `(tactic|group_refold ) => `(tactic| group_refold [])
+
+
+
 class Group (G: Type u) extends Add G, Neg G, Zero G where
-  assoc : ∀ a b c : G , (a + b) + c = a + (b + c)
-  neutral_right : ∀ a : G , a + 0 = a
-  neutral_left : ∀ a: G , 0 + a = a
-  inverse_right : ∀ a : G, a + (-a) = 0
-  inverse_left : ∀ a : G, (-a) + a = 0
+  assoc : ∀ a b c : G , (a + b) + c = a + (b + c) := by group_refold; intros; ac_nf
+  neutral_right : ∀ a : G , a + 0 = a := by group_refold
+  neutral_left : ∀ a: G , 0 + a = a := by group_refold
+  inverse_right : ∀ a : G, a + (-a) = 0 := by group_refold
+  inverse_left : ∀ a : G, (-a) + a = 0 := by group_refold
 
 instance [Group G] : Sub G where
   sub a b := a + (-b)
@@ -117,7 +127,7 @@ abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
 
 
 class AbelianGroup (G: Type) extends (Group G) where
-  comm : ∀ a b : G, a + b = b + a
+  comm : ∀ a b : G, a + b = b + a := by group_refold
 
 attribute [simp] AbelianGroup.comm
 
