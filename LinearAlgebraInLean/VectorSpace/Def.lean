@@ -5,7 +5,7 @@ import LinearAlgebraInLean.VectorSpace.Tactics
 
 class VectorSpace (F: Field F) (V : Type) extends AbelianGroup V, SMul F V where
   one_mul : ∀ v: V, (1:F) • v = v := by vector_space_refold
-  s_assoc : ∀ (r s: F) (v : V), r • (s • v) = (r * s) • v := by vector_space_refold
+  s_assoc : ∀ (r s: F) (v : V), r • (s • v) = (r * s) • v := by vector_space_refold; try intros; ac_nf
   s_distr_left : ∀ (r s : F) (v : V), (r+s)•v = (r•v) + (s•v) := by vector_space_refold
   s_distr_right : ∀ (r: F) (v w : V), r•(v+w) = (r•v) + (r•w) := by vector_space_refold
 
@@ -64,6 +64,7 @@ variable {F V} [F: Field F] [V: VectorSpace F V]
   | cons i iss ih =>
     unfold sum
     simp[ih]
+
 
 
 def linear_independent (F: Field F) (V: VectorSpace F V) (is: List α) (vs: α -> V) : Prop := ∀ (ls: α -> F), sum is (fun i => ls i • vs i) = 0 -> ∀ i ∈ is, ls i = 0

@@ -8,6 +8,9 @@ class Rng (R: Type) extends AbelianGroup R, Mul R where
   distr_left : ∀ a b c : R , (b + c) * a = (b * a) + (c * a)
   -- todo flip all theorems, the left side is the more simple one!
 
+attribute[simp] Rng.mul_assoc Rng.distr_left Rng.distr_right
+
+instance [g: Rng G]: Std.Associative (α := G) (. * .) := ⟨g.mul_assoc⟩
 namespace Rng
 variable [Rng R]
 
@@ -41,7 +44,6 @@ variable [Rng R]
 end Rng
 
 
-attribute[simp] Rng.mul_assoc Rng.distr_left Rng.distr_right
 
 
 class R1ng (R: Type) extends Rng R, One R where
@@ -54,6 +56,8 @@ class CommutativeRing (R: Type) extends Rng R where
   mul_comm: ∀ a b: R, a * b = b * a
 
 attribute[simp] CommutativeRing.mul_comm
+
+instance [g: CommutativeRing G]: Std.Commutative (α := G) (. * .) := ⟨g.mul_comm⟩
 
 class Field (R : Type) extends CommutativeRing R, R1ng R, Inv (Group.non_zeros toGroup) where
   mul_inverse_left: ∀ {a}, (h: a ≠ 0) -> (⟨a,h⟩: (Group.non_zeros toGroup))⁻¹ * a = 1
