@@ -46,15 +46,40 @@ def chain (φ: LinearMap W X) (ψ: LinearMap V W): LinearMap V X := by
   apply mk (φ ∘ ψ)
   simp
 
+infixl:90 (priority:= high) " ∘ " => LinearMap.chain
+
+variable (X Y: LinearMap V V)
+#check X ∘ Y
+
+def id : LinearMap V V := by
+  apply mk _root_.id
+  simp
+
+@[simp] def chain.assoc [A: VectorSpace F A] [B: VectorSpace F B] [C: VectorSpace F C] [D: VectorSpace F D]
+  {φ: LinearMap C D} {ψ: LinearMap B C} {θ: LinearMap A B}
+  :  φ ∘ (ψ ∘ θ) = (φ ∘ ψ) ∘ θ := by
+    apply ext
+    unfold chain
+    simp
+
+@[simp] def chain.id_left {φ: LinearMap V W} : id ∘ φ = φ := by
+  apply ext
+  simp [id, mk, chain]
+
+@[simp] def chain.id_right {φ: LinearMap V W} : φ ∘ id = φ := by
+  apply ext
+  simp [id, mk, chain]
 
 
-instance FunVectorSpace (X: Type) (Y: VectorSpace F Y): VectorSpace F $ X -> Y where
+
+
+instance FunVectorSpace (X: Type) (V: VectorSpace F V): VectorSpace F $ X -> V where
   add a b x := a x + b x
   smul μ a x := μ • a x
   neg a x :=  - a x
   zero x :=  0
 
-instance: VectorSpace F $ LinearMap V W :=
+instance Hom (V: VectorSpace F V) (W: VectorSpace F W): VectorSpace F $ LinearMap V W :=
   let := FunVectorSpace V W
   {
     add a b := by
@@ -72,12 +97,49 @@ instance: VectorSpace F $ LinearMap V W :=
       vector_space_refold [this]
   }
 
+abbrev Endo (V: VectorSpace F V) := Hom V V
 
+structure Isomorphism (V: VectorSpace F V) (W: VectorSpace F W) where
+  fwd : LinearMap V W
+  back : LinearMap W V
+  left : fwd ∘ back = id
+  right : back ∘ fwd = id
 
+def Isomorphism.invert (φ: Isomorphism V W): Isomorphism W V where
+  back := φ.fwd
+  fwd := φ.back
+  left := φ.right
+  right := φ.left
 
+def isomorphic (V: VectorSpace F V) (W: VectorSpace F W): Prop := Nonempty $ Isomorphism V W
 
+infix:100 " ≅ " => isomorphic
 
-infixl:60 (priority:= high) " ∘ " => LinearMap.chain
+def isomorphic.refl {V: VectorSpace F V}: V ≅ V := by
+  unfold isomorphic
+  constructor
+  constructor
+  show id ∘ id = id; rfl
+  show id ∘ id = id; rfl
 
-variable (X Y: LinearMap V V)
-#check X ∘ Y
+def isomorphic.symm {V: VectorSpace F V} {W: VectorSpace F W} : V ≅ W -> W ≅ V := by
+  unfold isomorphic
+  intro a
+  cases a
+  rename_i a
+  constructor
+  apply a.invert
+
+def isomorphic.trans {V: VectorSpace F V} {W: VectorSpace F W} {Z: VectorSpace F Z}
+  : V ≅ W -> W ≅ Z -> V ≅ Z := by
+  unfold isomorphic
+  intro a b
+  cases a; rename_i a
+  cases b; rename_i b
+  constructor
+  constructor
+  . show (b.fwd ∘ a.fwd) ∘ (a.back ∘ b.back) = id
+    conv => lhs; rw [<-chain.assoc]; rhs; rw [chain.assoc]
+    simp [a.left, b.left]
+  . conv => lhs; rw [<-chain.assoc]; rhs; rw [chain.assoc]
+    simp [a.right, b.right]
