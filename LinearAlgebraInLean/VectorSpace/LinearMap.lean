@@ -8,7 +8,7 @@ structure LinearMap (V: VectorSpace F V) (W: VectorSpace F W) extends GroupHom V
   scalar: ∀ (μ: F) (v: V), hom (μ • v) = μ • hom v
 
 namespace LinearMap
-variable [V: VectorSpace F V] [W: VectorSpace F W]
+variable [F: Field F] [V: VectorSpace F V] [W: VectorSpace F W]
 
 attribute[simp] LinearMap.scalar
 
@@ -33,11 +33,11 @@ abbrev mk (hom: V → W) (rule: ∀ (v u: V) (μ: F), hom (μ • v + u) = μ �
       assumption
   }
 
-def ext (φ ψ: LinearMap V W): (∀ x, φ x = ψ x) → φ = ψ := by
+@[ext] theorem ext (φ ψ: LinearMap V W): (∀ x, φ x = ψ x) → φ = ψ := by
   intro h
   cases φ <;> cases ψ
   simp at *
-  apply GroupHom.ext
+  ext
   simp [h]
 
 
@@ -55,19 +55,19 @@ def id : LinearMap V V := by
   apply mk _root_.id
   simp
 
-@[simp] def chain.assoc [A: VectorSpace F A] [B: VectorSpace F B] [C: VectorSpace F C] [D: VectorSpace F D]
+@[simp] theorem chain.assoc [A: VectorSpace F A] [B: VectorSpace F B] [C: VectorSpace F C] [D: VectorSpace F D]
   {φ: LinearMap C D} {ψ: LinearMap B C} {θ: LinearMap A B}
   :  φ ∘ (ψ ∘ θ) = (φ ∘ ψ) ∘ θ := by
-    apply ext
+    ext
     unfold chain
     simp
 
-@[simp] def chain.id_left {φ: LinearMap V W} : id ∘ φ = φ := by
-  apply ext
+@[simp] theorem chain.id_left {φ: LinearMap V W} : id ∘ φ = φ := by
+  ext
   simp [id, mk, chain]
 
-@[simp] def chain.id_right {φ: LinearMap V W} : φ ∘ id = φ := by
-  apply ext
+@[simp] theorem chain.id_right {φ: LinearMap V W} : φ ∘ id = φ := by
+  ext
   simp [id, mk, chain]
 
 
@@ -115,14 +115,14 @@ def isomorphic (V: VectorSpace F V) (W: VectorSpace F W): Prop := Nonempty $ Iso
 
 infix:100 " ≅ " => isomorphic
 
-def isomorphic.refl {V: VectorSpace F V}: V ≅ V := by
+@[refl] theorem isomorphic.refl: V ≅ V := by
   unfold isomorphic
   constructor
   constructor
   show id ∘ id = id; rfl
   show id ∘ id = id; rfl
 
-def isomorphic.symm {V: VectorSpace F V} {W: VectorSpace F W} : V ≅ W -> W ≅ V := by
+@[symm] theorem isomorphic.symm: V ≅ W -> W ≅ V := by
   unfold isomorphic
   intro a
   cases a
@@ -130,7 +130,7 @@ def isomorphic.symm {V: VectorSpace F V} {W: VectorSpace F W} : V ≅ W -> W ≅
   constructor
   apply a.invert
 
-def isomorphic.trans {V: VectorSpace F V} {W: VectorSpace F W} {Z: VectorSpace F Z}
+theorem isomorphic.trans [Z: VectorSpace F Z]
   : V ≅ W -> W ≅ Z -> V ≅ Z := by
   unfold isomorphic
   intro a b
@@ -143,3 +143,6 @@ def isomorphic.trans {V: VectorSpace F V} {W: VectorSpace F W} {Z: VectorSpace F
     simp [a.left, b.left]
   . conv => lhs; rw [<-chain.assoc]; rhs; rw [chain.assoc]
     simp [a.right, b.right]
+
+instance [F: Field F]: @Trans (VectorSpace F V) (VectorSpace F W) (VectorSpace F Z) isomorphic isomorphic isomorphic where
+  trans := isomorphic.trans

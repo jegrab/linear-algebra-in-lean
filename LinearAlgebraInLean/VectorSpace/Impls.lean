@@ -40,5 +40,5 @@ instance TupleSpace (F: Field F) (n: Nat): VectorSpace F $ Vector F n where
     apply Vector.mul_smul
     simp
   one_mul v := by
-    apply Vector.ext
+    ext
     simp

@@ -238,7 +238,7 @@ instance : CoeFun (GroupHom G H) (λ_ => (G -> H)) where
   coe hom := hom.hom
 
 
-def GroupHom.ext {f g: GroupHom G H}: (∀ x, f x = g x) → f = g := by
+@[ext] theorem GroupHom.ext {f g: GroupHom G H}: (∀ x, f x = g x) → f = g := by
   intro h
   cases f <;> cases g
   simp at *
