@@ -105,11 +105,16 @@ structure Isomorphism (V: VectorSpace F V) (W: VectorSpace F W) where
   left : fwd ∘ back = id
   right : back ∘ fwd = id
 
+instance : CoeFun (Isomorphism V W) (fun _ =>  V -> W) where
+  coe φ := φ.fwd
+
 def Isomorphism.invert (φ: Isomorphism V W): Isomorphism W V where
   back := φ.fwd
   fwd := φ.back
   left := φ.right
   right := φ.left
+
+postfix:max (priority := high) "⁻¹" => Isomorphism.invert
 
 def isomorphic (V: VectorSpace F V) (W: VectorSpace F W): Prop := Nonempty $ Isomorphism V W
 
