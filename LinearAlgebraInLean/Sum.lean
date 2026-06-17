@@ -1,12 +1,13 @@
 import LinearAlgebraInLean.Group
+import LinearAlgebraInLean.Field
 
-def sum [Add t] [Zero t] (indices: List α) (values: α -> t) : t :=
+def sum [Add t] [Zero t] (indices: List t) : t :=
   match indices with
   | [] => 0
-  | i::is => values i + sum is values
+  | i::is => i + sum is
 
 namespace Sum
-@[simp] theorem split [G: Group G] (ia: List α) (ib: List α) (v: α -> G) : sum ia v + sum ib v = sum (ia ++ ib) v := by
+@[simp] theorem split [G: Group G] (ia: List G) (ib: List G) : sum ia + sum ib = sum (ia ++ ib) := by
   induction ia with
   | nil =>
     unfold sum
@@ -14,16 +15,16 @@ namespace Sum
   | cons i is ih =>
     simp [sum, ih]
 
-theorem split_cons [G: Group G] (i1: α) (ia: List α) (v: α -> G) : sum (i1::ia) v = v  i1  + sum ia v := by
+theorem split_cons [G: Group G] (i1: G) (ia: List G) : sum (i1::ia) = i1  + sum ia := by
   conv =>
     lhs
     unfold sum
 
-theorem swap_split [G: AbelianGroup G] (ia: List α) (ib: List α) (v: α -> G) : sum (ia ++ ib) v = sum (ib ++ ia) v := by
+theorem swap_split [G: AbelianGroup G] (ia: List G) (ib: List G) : sum (ia ++ ib) = sum (ib ++ ia) := by
   rw [<-split, <-split]
   simp
 
-theorem erase_then_add [G: AbelianGroup G] [BEq α] [LawfulBEq α] (is: List α) (i1: α) (v: α -> G) (h: is.contains i1 = true): sum (is.erase i1  ++ [i1]) v = sum is v := by
+theorem erase_then_add [G: AbelianGroup G] [BEq G] [LawfulBEq G] (is: List G) (i1: G) (h: is.contains i1) : sum (is.erase i1  ++ [i1]) = sum is := by
   induction is with
   | nil => contradiction
   | cons i is ih =>
@@ -65,7 +66,7 @@ theorem erase_then_add [G: AbelianGroup G] [BEq α] [LawfulBEq α] (is: List α)
       rw [ih]
 
 
-theorem erase_then_add_cons [G: AbelianGroup G] [BEq α] [LawfulBEq α] (i1: α) (is: List α) (v: α -> G) (h: is.contains i1 = true): sum (i1 :: is.erase i1) v = sum is v := by
+theorem erase_then_add_cons [G: AbelianGroup G] [BEq G] [LawfulBEq G] (i1: G) (is: List G) (h: is.contains i1 = true): sum (i1 :: is.erase i1) = sum is := by
   have : i1 :: is.erase i1 = [i1] ++ is.erase i1 := by simp
   rw [this]
   rw [swap_split]
@@ -73,6 +74,14 @@ theorem erase_then_add_cons [G: AbelianGroup G] [BEq α] [LawfulBEq α] (i1: α)
   assumption
 
 
+@[simp] theorem sum_distr[F: Field F] {is: List F} {x: F} : sum (List.map (fun i => x * i) is) = x * sum is := by
+  induction is with
+  | nil =>
+    unfold sum
+    simp
+  | cons i iss ih =>
+    unfold sum
+    simp[ih]
 
 end Sum
 
