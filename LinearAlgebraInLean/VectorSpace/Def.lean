@@ -110,6 +110,29 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq α][LawfulBEq α]
   . rw [List.contains_eq_mem]
     simpa using h2
 
+theorem lin_dep_from_v_is_lincomb_of_others [BEq α][LawfulBEq α]
+        (is: List α) (vs: α -> V) (hl: ∃ i ∈ is, ∃ (ys: α -> F), vs i = sum (is.erase i) (fun j => ys j • vs j)) :
+        ¬ linear_independent F V is vs := by
+        have ⟨i,hi, xs, hys⟩ := hl
+        let ys j := if j == i then 1 else - xs j
+        have yiEqOne : ys i = 1 := by simp[ys]
+        have : sum is (fun j => ys j • vs j) = 0 :=  by
+          rw [<-Sum.erase_then_add_cons i]
+          unfold sum
+          unfold ys
+          simp
+          unfold sum
+
+          sorry
+          sorry
+        intro h_lc
+        unfold linear_independent at h_lc
+        let x := h_lc ys this
+        have yiNeqOne : ys i = 0 := x i hi
+        rw [yiNeqOne] at yiEqOne
+        have x := F.one_is_not_zero yiEqOne.symm
+        exact x
+
 
 
 

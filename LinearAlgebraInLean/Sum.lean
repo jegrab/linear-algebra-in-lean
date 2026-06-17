@@ -64,6 +64,16 @@ theorem erase_then_add [G: AbelianGroup G] [BEq α] [LawfulBEq α] (is: List α)
       simp [split_cons]
       rw [ih]
 
+
+theorem erase_then_add_cons [G: AbelianGroup G] [BEq α] [LawfulBEq α] (i1: α) (is: List α) (v: α -> G) (h: is.contains i1 = true): sum (i1 :: is.erase i1) v = sum is v := by
+  have : i1 :: is.erase i1 = [i1] ++ is.erase i1 := by simp
+  rw [this]
+  rw [swap_split]
+  apply erase_then_add
+  assumption
+
+
+
 end Sum
 
 --
