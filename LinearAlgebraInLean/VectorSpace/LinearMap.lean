@@ -46,9 +46,9 @@ def chain (φ: LinearMap W X) (ψ: LinearMap V W): LinearMap V X := by
   apply mk (φ ∘ ψ)
   simp
 
-infixl:90 (priority:= high) " ∘ " => LinearMap.chain
+scoped infixl:90 (priority:= high) " ∘ " => LinearMap.chain
 
-variable (X Y: LinearMap V V)
+variable (X Y: LinearMap V V) (a b:  x -> x)
 #check X ∘ Y
 
 def id : LinearMap V V := by
