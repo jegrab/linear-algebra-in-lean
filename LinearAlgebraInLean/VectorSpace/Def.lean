@@ -57,6 +57,33 @@ variable {F V} [F: Field F] [V: VectorSpace F V]
     exact h₂
 
 
+@[simp] theorem zero_mul {v: V}: (0: F) • v = 0 := by
+  rw [<-Group.inverse_left 1, VectorSpace.s_distr_left]
+  simp
+
+@[simp] theorem mul_zero {μ : F}: μ • (0: V) = 0 := by
+  have : μ • (0: V) + μ • 0 = μ • 0 := by simp
+  apply Group.neutral_unique this
+
+theorem _root_.Sum.const_vs [VectorSpace F S] {a: S}: sum (List.replicate n a) = (n: F) • a := by
+  induction n with
+    | zero => simp [sum, nat_to_r1ng]
+    | succ n h =>
+      unfold List.replicate
+      simp [nat_to_r1ng]
+      unfold sum
+      rw [h, One.one_is_ofNat]
+      simp
+
+theorem _root_.Sum.scalar [V: VectorSpace F S] {μ: F} {ls: List V}: sum (List.map (μ • .) ls) =  μ • sum ls := by
+  induction ls with
+    | nil => simp[sum]
+    | cons a as h =>
+      unfold List.map
+      unfold sum
+      simp
+      congr
+
 def linear_independent (vs: List V) : Prop := ∀ (ls: List F) (h: ls.length = vs.length), sum (ls.zipWith (. • .) vs) = 0 -> ∀ l ∈ ls, l = 0
 
 theorem emptyset_is_linear_independent : @linear_independent F V F V [] := by
@@ -169,28 +196,28 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq V][LawfulBEq V][BEq F][EquivBEq
       _ = v1 := by simp
 
 
-theorem lin_dep_from_v_is_lincomb_of_others [BEq α][LawfulBEq α]
-        (is: List α) (vs: α -> V) (hl: ∃ i ∈ is, ∃ (ys: α -> F), vs i = sum (is.erase i) (fun j => ys j • vs j)) :
-        ¬ linear_independent F V is vs := by
-        have ⟨i,hi, xs, hys⟩ := hl
-        let ys j := if j == i then 1 else - xs j
-        have yiEqOne : ys i = 1 := by simp[ys]
-        have : sum is (fun j => ys j • vs j) = 0 :=  by
-          rw [<-Sum.erase_then_add_cons i]
-          unfold sum
-          unfold ys
-          simp
-          unfold sum
+-- theorem lin_dep_from_v_is_lincomb_of_others [BEq α][LawfulBEq α]
+--         (is: List α) (vs: α -> V) (hl: ∃ i ∈ is, ∃ (ys: α -> F), vs i = sum (is.erase i) (fun j => ys j • vs j)) :
+--         ¬ linear_independent F V is vs := by
+--         have ⟨i,hi, xs, hys⟩ := hl
+--         let ys j := if j == i then 1 else - xs j
+--         have yiEqOne : ys i = 1 := by simp[ys]
+--         have : sum is (fun j => ys j • vs j) = 0 :=  by
+--           --rw [<-Sum.erase_then_add_cons i]
+--           unfold sum
+--           unfold ys
+--           --simp
+--           unfold sum
 
-          sorry
-          sorry
-        intro h_lc
-        unfold linear_independent at h_lc
-        let x := h_lc ys this
-        have yiNeqOne : ys i = 0 := x i hi
-        rw [yiNeqOne] at yiEqOne
-        have x := F.one_is_not_zero yiEqOne.symm
-        exact x
+--           sorry
+--           --sorry
+--         intro h_lc
+--         unfold linear_independent at h_lc
+--         let x := h_lc ys this
+--         have yiNeqOne : ys i = 0 := x i hi
+--         rw [yiNeqOne] at yiEqOne
+--         have x := F.one_is_not_zero yiEqOne.symm
+--         exact x
 
 
 

@@ -176,13 +176,17 @@ theorem remove_both_sides_left (x: F.non_zeros) (h: x.val * a = x.val *b) : a = 
 
 end Field
 
--- private def nat_to_field [f: R1ng R]: Nat -> R
---   | 0 => 0
---   | n + 1 => nat_to_field n + f.one
+def nat_to_r1ng [f: R1ng R]: Nat -> R
+  | 0 => 0
+  | n + 1 => nat_to_r1ng n + f.one
 
--- instance [f: Field R]: OfNat (R) n where
---   ofNat := nat_to_field n
+instance (priority := low) [f: R1ng R]: OfNat (R) n where
+  ofNat := nat_to_r1ng n
 
+instance [R: R1ng R]: Coe Nat R where
+  coe n := nat_to_r1ng n
+instance [R: Field R]: Coe Nat R where
+  coe n := nat_to_r1ng n
 
 structure RngHom (F: Rng F) (G: Rng G) extends GroupHom F.toGroup G.toGroup where
   mul: ∀ a b:F, hom (a * b) = hom a * hom b

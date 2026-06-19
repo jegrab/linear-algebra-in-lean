@@ -93,6 +93,58 @@ theorem perm [G: AbelianGroup G] (xs: List G) (ys: List G) (h: List.Perm xs ys) 
     unfold sum
     simp[ih]
 
+theorem perm [S: AbelianGroup S] {la lb: List S} (h: la.Perm lb): sum la = sum lb := by
+  induction h with
+   | nil => simp
+   | cons x la ih => unfold sum; simp[ih]
+   | trans => simp_all
+   | swap x y l =>
+    iterate 2 (unfold sum)
+    iterate 2 rw [<-S.assoc]
+    simp
+
+theorem push [S: AbelianGroup S] {a b: S}: sum ((a + b) :: ls) = sum (a :: b :: ls) := by
+  unfold sum
+  conv => rhs; unfold sum
+  rw [<-S.assoc]
+
+
+theorem unzip [AbelianGroup S] {ls: List α} {f g: α -> S}: sum (List.map (fun x => f x + g x) ls) = sum (List.map f ls) + sum (List.map g ls) := by
+  induction ls with
+  | nil => simp
+  | cons x xs ih =>
+    simp
+    rw [push]
+    unfold sum
+    congr 1
+    have {x: S} {l1 l2: List S}:  (x :: (l1 ++ l2)).Perm (l1 ++ (x :: l2)) := by
+      apply List.perm_cons_append_cons
+      rfl
+    rw [<-perm this]
+    unfold sum
+    congr 1
+    simp [ih]
+
+theorem const [R1ng S] {a: S}: sum (List.replicate n a) = n * a := by
+  induction n with
+    | zero => simp [sum, nat_to_r1ng]
+    | succ n h =>
+      unfold List.replicate
+      simp [nat_to_r1ng]
+      unfold sum
+      rw [h, One.one_is_ofNat]
+      simp
+
+theorem neg [S: AbelianGroup S] {ls: List S}: sum (List.map S.neg ls) = - sum ls := by
+  induction ls with
+    | nil => simp [sum]
+    | cons x ll ih =>
+      unfold List.map
+      unfold sum
+      simp [ih]
+
+
+
 end Sum
 
 --

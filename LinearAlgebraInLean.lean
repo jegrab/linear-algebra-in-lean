@@ -5,3 +5,5 @@ import LinearAlgebraInLean.Group
 import LinearAlgebraInLean.Field
 import LinearAlgebraInLean.Implementations.Finite
 import LinearAlgebraInLean.Implementations.Rat
+
+import LinearAlgebraInLean.VectorSpace.Basis
