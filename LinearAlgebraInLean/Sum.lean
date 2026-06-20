@@ -7,6 +7,17 @@ def sum [Add t] [Zero t] (indices: List t) : t :=
   | i::is => i + sum is
 
 namespace Sum
+
+@[simp] theorem empty [Zero T] [Add T]: sum [] = (0: T) := by
+  unfold sum
+  simp
+
+@[simp] theorem singleton {x: t} [Group t]: sum [x] = x := by
+  unfold sum
+  unfold sum
+  simp
+
+
 @[simp] theorem split [G: Group G] (ia: List G) (ib: List G) : sum ia + sum ib = sum (ia ++ ib) := by
   induction ia with
   | nil =>

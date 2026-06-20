@@ -6,7 +6,7 @@ namespace LA.VectorSpace
 variable [F: Field F] [V: VectorSpace F V]
 
 
-abbrev Span (vs: List V): Subspace V := by
+abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
   apply Subspace.mk (fun v: V => ∃ s: List F, s.length = vs.length ∧ v = sum (s.zipWith (. • .) vs))
   . constructor
     exists 0
@@ -42,3 +42,7 @@ abbrev Span (vs: List V): Subspace V := by
       rwa [SMul.smul_eq_hSMul]
       apply Nat.le_of_eq
       simp [lx, ly]
+
+
+def Basis (V: VectorSpace F V) (vs: List V) := ∀ x, (Span F vs).pred x -- and linear independent
+
