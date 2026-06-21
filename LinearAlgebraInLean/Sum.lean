@@ -73,6 +73,16 @@ theorem erase_then_add_cons [G: AbelianGroup G] [BEq G] [LawfulBEq G] (i1: G) (i
   apply erase_then_add
   assumption
 
+theorem perm [G: AbelianGroup G] (xs: List G) (ys: List G) (h: List.Perm xs ys) : sum xs = sum ys := by
+  induction h with
+  | nil => simp
+  | cons x h1 h2 =>
+    simp[split_cons,h2]
+  | swap x y l =>
+    simp[split_cons]
+    rw[<-G.assoc,<-G.assoc,G.comm y x]
+  | trans l1 l2 h1 h2 =>
+    simp[h1,h2]
 
 @[simp] theorem sum_distr[F: Field F] {is: List F} {x: F} : sum (List.map (fun i => x * i) is) = x * sum is := by
   induction is with
