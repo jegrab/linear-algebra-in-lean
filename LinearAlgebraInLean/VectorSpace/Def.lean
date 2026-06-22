@@ -210,22 +210,26 @@ theorem lin_dep_from_v_is_lincomb_of_others [BEq V][LawfulBEq V][BEq F][EquivBEq
   have h_len'' : xs''.length = vs.length := by
     simp[xs'', h_lsLen, h, List.length_insertIdx,h_i']
     grind --todo: grind
-  have h_perm : List.Perm (xs''.zip vs) (xs'.zip vs') := by
-    simp[xs',vs', xs'']
+  have h_perm : List.Perm (List.zipWith (fun x v => x • v) xs'' vs)  (List.zipWith (fun x v => x • v) xs' vs'):= by
+    simp[xs'', xs', vs',v1]
     sorry
-
   unfold linear_independent
   simp
   exists xs''
   constructor
   exact h_len''
   constructor
-  sorry
+  rw [Sum.perm h_perm]
+  assumption
+  exists xs''[i1]
   constructor
-  sorry
-  sorry
-
-
-
+  simp
+  simp[xs'']
+  intro h
+  have this := congrArg (fun x => 1 + x) h
+  simp at this
+  have neq : (1:F) ≠ 0 := Field.one_is_not_zero
+  unfold Ne at neq
+  exact neq this.symm
 
 end VectorSpace
