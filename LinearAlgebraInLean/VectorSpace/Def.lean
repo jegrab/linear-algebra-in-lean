@@ -137,7 +137,7 @@ theorem List.getElem_cons_eraseIdx_perm
             (List.Perm.cons x (ih i hi'))
 
 theorem v_is_lincomb_of_others_from_lin_dep [BEq V][LawfulBEq V][BEq F][EquivBEq F][LawfulBEq F]
-        (vs: List V) (hv: vs ≠ []) (hl : ¬ @linear_independent F V F V vs) :
+        (vs: List V) (hl : ¬ @linear_independent F V F V vs) :
         ∃ i1:Nat, ∃h:i1 < vs.length, ∃ ls : List F, ls.length = vs.length - 1 ∧ vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1)) := by
   unfold linear_independent at hl
   simp at hl
@@ -196,28 +196,34 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq V][LawfulBEq V][BEq F][EquivBEq
       _ = v1 := by simp
 
 
--- theorem lin_dep_from_v_is_lincomb_of_others [BEq α][LawfulBEq α]
---         (is: List α) (vs: α -> V) (hl: ∃ i ∈ is, ∃ (ys: α -> F), vs i = sum (is.erase i) (fun j => ys j • vs j)) :
---         ¬ linear_independent F V is vs := by
---         have ⟨i,hi, xs, hys⟩ := hl
---         let ys j := if j == i then 1 else - xs j
---         have yiEqOne : ys i = 1 := by simp[ys]
---         have : sum is (fun j => ys j • vs j) = 0 :=  by
---           --rw [<-Sum.erase_then_add_cons i]
---           unfold sum
---           unfold ys
---           --simp
---           unfold sum
+theorem lin_dep_from_v_is_lincomb_of_others [BEq V][LawfulBEq V][BEq F][EquivBEq F][LawfulBEq F]
+        (vs: List V) (h: ∃ i1:Nat, ∃h:i1 < vs.length, ∃ ls : List F, ls.length = vs.length - 1 ∧ vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1))) :
+        ¬ @linear_independent F V F V vs := by
+  have ⟨i1, h, xs, h_lsLen, h_repr⟩ := h
+  let v1 := vs[i1]
+  have : sum (List.zipWith (fun x v => x • v) xs (vs.eraseIdx i1)) + -v1 = 0 := by simp[v1, h_repr]
+  let xs' := -1 :: xs
+  let vs' := v1 :: vs.eraseIdx i1
+  have : sum (List.zipWith (fun x v => x • v) xs' vs') = 0 := by simp[xs', vs', this,Sum.split_cons]
+  let xs'' := xs.insertIdx i1 (-1)
+  have h_i' : i1 <= vs.length - 1:= by grind -- todo: grind
+  have h_len'' : xs''.length = vs.length := by
+    simp[xs'', h_lsLen, h, List.length_insertIdx,h_i']
+    grind --todo: grind
+  have h_perm : List.Perm (xs''.zip vs) (xs'.zip vs') := by
+    simp[xs',vs', xs'']
+    sorry
 
---           sorry
---           --sorry
---         intro h_lc
---         unfold linear_independent at h_lc
---         let x := h_lc ys this
---         have yiNeqOne : ys i = 0 := x i hi
---         rw [yiNeqOne] at yiEqOne
---         have x := F.one_is_not_zero yiEqOne.symm
---         exact x
+  unfold linear_independent
+  simp
+  exists xs''
+  constructor
+  exact h_len''
+  constructor
+  sorry
+  constructor
+  sorry
+  sorry
 
 
 
