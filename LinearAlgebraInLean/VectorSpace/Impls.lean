@@ -10,12 +10,14 @@ instance FieldSpace (F: Field F): VectorSpace F F where
 theorem DefaultFieldBasis [F: Field F]: Basis (FieldSpace F) [1] := by
   unfold Basis
   intro x
-  simp [Subspace.pred]
-  exists [x]
   constructor
-  simp
-  simp
-  simp [HSMul.hSMul, SMul.smul]
+  . simp
+    exists [x]
+    constructor
+    simp
+    simp
+    simp [HSMul.hSMul, SMul.smul]
+  . sorry
 
 
 
@@ -58,20 +60,6 @@ instance TupleSpace (F: Field F) (n: Nat): VectorSpace F $ Vector F n where
     simp
 
 
-theorem Sum.vector_component [Field F] {h: i < n} {ls: List $ Vector F n}: (sum ls)[i] = sum (List.map (fun x => x[i]) ls) := by
-  induction ls with
-  | nil => simp
-  | cons x xs h =>
-    simp
-    unfold sum
-    rw [Vector.getElem_add]
-    congr
-
-def δ [Zero α] [One α] (i: Nat) (j: Nat): α := if i = j then 1 else 0
-
-theorem delta.succ [Zero α] [One α] (i j: Nat): (δ i j: α) = δ (i+1) (j+1) := by
-  unfold δ
-  simp
 
 theorem Sum.delta_vs [F: Field F] [G: VectorSpace F G] {f: α -> G} {ls: List α} {h: n = ls.length} (j: Nat)  {hj: j < n}
   : sum (List.zipWith (fun l (i: Fin n) => (δ i j :F) • f l) ls $ List.finRange n) = f ls[j] := by
@@ -101,6 +89,7 @@ theorem Sum.delta_vs [F: Field F] [G: VectorSpace F G] {f: α -> G} {ls: List α
       assumption
       assumption
 
+
 theorem Sum.delta [G: Field G] {f: α -> G} {ls: List α} {h: n = ls.length} (j: Nat)  {hj: j < n}
   : sum (List.zipWith (fun l (i: Fin n) => δ i j * f l) ls $ List.finRange n) = f ls[j] := by
   let := FieldSpace G
@@ -110,26 +99,27 @@ theorem Sum.delta [G: Field G] {f: α -> G} {ls: List α} {h: n = ls.length} (j:
   all_goals assumption
 
 
-
 theorem DefaultBasis [F: Field F]: Basis (TupleSpace F n) $ List.map (fun x => (Vector.zero).set x.val 1) $ List.finRange n := by
   unfold Basis
   intro x
-  simp [Subspace.pred]
-  exists x.toList
   constructor
   . simp
-  rw [<-List.map_uncurry_zip_eq_zipWith, List.zip_map_right, List.map_map]
-  unfold Function.comp
-  unfold Function.uncurry
-  simp
-  simp [HSMul.hSMul, SMul.smul, Vector.smul, Vector.zero, Vector.map_replicate, Mul.mul_eq_hMul]
-  rw [List.map_zip_eq_zipWith]
-  unfold Function.curry
-  simp
-  ext i hi
-  rw [Sum.vector_component, List.map_zipWith]
-  conv => pattern (fun _ => _); ext x y; rw [Vector.getElem_set]; simp; tactic => (calc _ = δ y i * x := by unfold δ; split; all_goals simp)
-  rw [Sum.delta]
-  simp
-  assumption
-  simp
+    exists x.toList
+    constructor
+    . simp
+    rw [<-List.map_uncurry_zip_eq_zipWith, List.zip_map_right, List.map_map]
+    unfold Function.comp
+    unfold Function.uncurry
+    simp
+    simp [HSMul.hSMul, SMul.smul, Vector.smul, Vector.zero, Vector.map_replicate, Mul.mul_eq_hMul]
+    rw [List.map_zip_eq_zipWith]
+    unfold Function.curry
+    simp
+    ext i hi
+    rw [Sum.vector_component, List.map_zipWith]
+    conv => pattern (fun _ => _); ext x y; rw [Vector.getElem_set]; simp; tactic => (calc _ = δ y i * x := by unfold δ; split; all_goals simp)
+    rw [Sum.delta]
+    simp
+    assumption
+    simp
+  . sorry

@@ -77,23 +77,12 @@ theorem erase_then_add [G: AbelianGroup G] [BEq G] [LawfulBEq G] (is: List G) (i
       rw [ih]
 
 
-theorem erase_then_add_cons [G: AbelianGroup G] [BEq G] [LawfulBEq G] (i1: G) (is: List G) (h: is.contains i1 = true): sum (i1 :: is.erase i1) = sum is := by
+theorem erase_then_add_cons [G: AbelianGroup G] [BEq G] [LawfulBEq G] (i1: G) (is: List G) (h: is.contains i1): sum (i1 :: is.erase i1) = sum is := by
   have : i1 :: is.erase i1 = [i1] ++ is.erase i1 := by simp
   rw [this]
   rw [swap_split]
   apply erase_then_add
   assumption
-
-theorem perm [G: AbelianGroup G] (xs: List G) (ys: List G) (h: List.Perm xs ys) : sum xs = sum ys := by
-  induction h with
-  | nil => simp
-  | cons x h1 h2 =>
-    simp[split_cons,h2]
-  | swap x y l =>
-    simp[split_cons]
-    rw[<-G.assoc,<-G.assoc,G.comm y x]
-  | trans l1 l2 h1 h2 =>
-    simp[h1,h2]
 
 @[simp] theorem sum_distr[F: Field F] {is: List F} {x: F} : sum (List.map (fun i => x * i) is) = x * sum is := by
   induction is with
@@ -138,7 +127,7 @@ theorem unzip [AbelianGroup S] {ls: List α} {f g: α -> S}: sum (List.map (fun 
 
 theorem const [R1ng S] {a: S}: sum (List.replicate n a) = n * a := by
   induction n with
-    | zero => simp [sum, nat_to_r1ng]
+    | zero => simp [nat_to_r1ng]
     | succ n h =>
       unfold List.replicate
       simp [nat_to_r1ng]
@@ -154,11 +143,33 @@ theorem neg [S: AbelianGroup S] {ls: List S}: sum (List.map S.neg ls) = - sum ls
       unfold sum
       simp [ih]
 
+theorem vector_component [Field F] {h: i < n} {ls: List $ Vector F n}: (sum ls)[i] = sum (List.map (fun x => x[i]) ls) := by
+  induction ls with
+  | nil => simp
+  | cons x xs h =>
+    simp
+    unfold sum
+    rw [Vector.getElem_add]
+    congr
+
+
+
 
 
 end Sum
 
---
+
+
+def δ [Zero α] [One α] (i: Nat) (j: Nat): α := if i = j then 1 else 0
+
+theorem delta.succ [Zero α] [One α] (i j: Nat): (δ i j: α) = δ (i+1) (j+1) := by
+  unfold δ
+  simp
+
+
+--? statements about sums of delta are currently in VectorSpace/Impls!
+
+
 -- problems with list for indices:
 --  need to define the vectors for all values that could be in the list, not only the ones that actually are
 --

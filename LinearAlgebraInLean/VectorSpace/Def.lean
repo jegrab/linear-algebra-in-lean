@@ -67,7 +67,7 @@ variable {F V} [F: Field F] [V: VectorSpace F V]
 
 theorem _root_.Sum.const_vs [VectorSpace F S] {a: S}: sum (List.replicate n a) = (n: F) • a := by
   induction n with
-    | zero => simp [sum, nat_to_r1ng]
+    | zero => simp [nat_to_r1ng]
     | succ n h =>
       unfold List.replicate
       simp [nat_to_r1ng]
@@ -84,7 +84,7 @@ theorem _root_.Sum.scalar [V: VectorSpace F S] {μ: F} {ls: List V}: sum (List.m
       simp
       congr
 
-def linear_independent (vs: List V) : Prop := ∀ (ls: List F) (h: ls.length = vs.length), sum (ls.zipWith (. • .) vs) = 0 -> ∀ l ∈ ls, l = 0
+def linear_independent (F:Field F) [V: VectorSpace F V] (vs: List V) : Prop := ∀ (ls: List F) (_: ls.length = vs.length), sum (ls.zipWith (. • .) vs) = 0 -> ∀ l ∈ ls, l = 0
 
 theorem emptyset_is_linear_independent : @linear_independent F V F V [] := by
   unfold linear_independent
