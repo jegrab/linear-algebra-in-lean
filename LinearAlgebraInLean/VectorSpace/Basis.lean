@@ -5,6 +5,7 @@ namespace LA.VectorSpace
 
 variable [F: Field F] [V: VectorSpace F V]
 
+def LinearIndependent (F: Field F) [V: VectorSpace F V] (vs: List V): Prop := ∀ (ss: List F) (h: ss.length = vs.length), sum (List.zipWith (. • .) ss vs) = 0 -> ∀ i ∈ vs, i = 0 -- or ss = List.replicate vs.length 0
 
 abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
   apply Subspace.mk (fun v: V => ∃ s: List F, s.length = vs.length ∧ v = sum (s.zipWith (. • .) vs))
@@ -44,5 +45,4 @@ abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
       simp [lx, ly]
 
 
-def Basis (V: VectorSpace F V) (vs: List V) := ∀ x, (Span F vs).pred x -- and linear independent
-
+def Basis (V: VectorSpace F V) (vs: List V) := ∀ x, (Span F vs).pred x ∧ LinearIndependent F vs -- and linear independent

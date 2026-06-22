@@ -3,7 +3,7 @@ import LinearAlgebraInLean.VectorSpace.LinearMap
 namespace LA
 
 
-class Subspace (V: VectorSpace F V) where
+structure Subspace (V: VectorSpace F V) where
   from_def ::
   pred: V -> Prop
   toVectorSpace: VectorSpace F (Subtype pred)
@@ -11,7 +11,7 @@ class Subspace (V: VectorSpace F V) where
   smul_is_smul: ∀ (μ : F) (v: Subtype pred), (↑(μ • v): V) = μ • ↑v
 
 attribute[simp] Subspace.add_is_add
-attribute[reducible, instance] Subspace.toVectorSpace
+attribute[instance] Subspace.toVectorSpace
 
 -- instance [V: VectorSpace F V] (s: Subspace V): CoeDep (Subspace V) s (VectorSpace F $ Subtype s.pred) where
 --   coe := s.toVectorSpace
@@ -21,7 +21,7 @@ instance : CoeSort (Subspace V) Type where
   coe x := Subtype x.pred
 
 namespace Subspace
-variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} [U: Subspace V]
+variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} {U: Subspace V}
 
 #check U.toVectorSpace.zero
 
