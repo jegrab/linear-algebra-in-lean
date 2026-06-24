@@ -111,18 +111,23 @@ def Isomorphism.invert (φ: Isomorphism V W): Isomorphism W V where
   left := φ.right
   right := φ.left
 
+end LinearMap
+
+namespace VectorSpace
+open LinearMap
+
 def isomorphic (V: VectorSpace F V) (W: VectorSpace F W): Prop := Nonempty $ Isomorphism V W
 
 infix:100 " ≅ " => isomorphic
 
-def isomorphic.refl {V: VectorSpace F V}: V ≅ V := by
+@[refl] def isomorphic.refl {V: VectorSpace F V}: V ≅ V := by
   unfold isomorphic
   constructor
   constructor
-  show id ∘ id = id; rfl
-  show id ∘ id = id; rfl
+  show id ∘ id = (id : LinearMap _ _); rfl
+  show id ∘ id = (id: LinearMap _ _); rfl
 
-def isomorphic.symm {V: VectorSpace F V} {W: VectorSpace F W} : V ≅ W -> W ≅ V := by
+@[symm] def isomorphic.symm {V: VectorSpace F V} {W: VectorSpace F W} : V ≅ W -> W ≅ V := by
   unfold isomorphic
   intro a
   cases a
@@ -138,8 +143,13 @@ def isomorphic.trans {V: VectorSpace F V} {W: VectorSpace F W} {Z: VectorSpace F
   cases b; rename_i b
   constructor
   constructor
-  . show (b.fwd ∘ a.fwd) ∘ (a.back ∘ b.back) = id
+  . show (b.fwd ∘ a.fwd) ∘ (a.back ∘ b.back) = (id : LinearMap _ _)
     conv => lhs; rw [<-chain.assoc]; rhs; rw [chain.assoc]
     simp [a.left, b.left]
   . conv => lhs; rw [<-chain.assoc]; rhs; rw [chain.assoc]
     simp [a.right, b.right]
+
+private abbrev isomorphic_ (F: Field F) (V W: Type) (V: VectorSpace F V) (W: VectorSpace F W) := @isomorphic F F V W V W
+
+instance [Z: VectorSpace F Z]: Trans (isomorphic_ F V W) (isomorphic_ F W Z) (isomorphic_ F V Z) where
+    trans := isomorphic.trans
