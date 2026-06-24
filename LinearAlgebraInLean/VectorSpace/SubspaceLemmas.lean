@@ -71,3 +71,13 @@ instance : Inter $ Subspace V where
 
 instance : Add $ Subspace V where
   add := sum
+
+theorem eq_zero_from_pred {U : Subspace V} (h: ∀x: V, U.pred x -> x = 0): U = zero_subspace := by
+  ext
+  constructor
+  . simp
+    apply h
+  . simp
+    intro hx
+    rw[hx]
+    exact zero_in_subspace U

@@ -112,14 +112,6 @@ def Isomorphism.invert (φ: Isomorphism V W): Isomorphism W V where
   left := φ.right
   right := φ.left
 
-@[reducible] def kernel (φ: LinearMap V W) : Subspace V := by
-  apply Subspace.mk (fun x => φ x = 0)
-  . constructor
-    exists 0
-    apply φ.zero
-  . intro u v μ
-    simp [u.property, v.property]
-
 end LinearMap
 
 namespace VectorSpace
