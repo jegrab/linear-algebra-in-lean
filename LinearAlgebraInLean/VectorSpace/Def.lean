@@ -195,6 +195,77 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq V][LawfulBEq V][BEq F][EquivBEq
       _ = (1:F) • v1 := by simp[<-x1_inv]
       _ = v1 := by simp
 
+--  (List.zipWith (fun x v => x • v) (xs.insertIdx i1 (-1)) vs).Perm
+--  (-vs[i1] :: List.zipWith (fun x v => x • v) xs (vs.eraseIdx i1))
+
+theorem List.zipWith_insertIdx_eraseIdx_perm
+  (f :a -> b -> c) (xs: List a) (ys: List b) (x: a) (i: Nat) (h1: i < ys.length) (h2: xs.length = ys.length-1):
+  (List.zipWith f (xs.insertIdx i x) ys).Perm (f x ys[i] :: List.zipWith f xs (ys.eraseIdx i)) := by
+  induction xs generalizing ys i with
+  | nil =>
+    cases ys
+    . contradiction
+    . unfold List.zipWith
+      have : i = 0 := by grind
+      simp[this]
+  | cons x1 xs ih =>
+    cases ys with
+    | nil => contradiction
+    | cons y ys =>
+      by_cases h_iz: i = 0
+      . subst h_iz
+        have : (x1 :: xs).insertIdx 0 x = x :: x1 :: xs := by rfl
+        rw[this]
+        have : (y :: ys).eraseIdx 0 = ys := by rfl
+        rw[this]
+        conv in (List.zipWith f (x :: x1 :: xs) (y :: ys)) =>
+          unfold List.zipWith
+        have : f x y = f x (y :: ys)[0] := by rfl
+        rw[this]
+      . let j := i-1
+        have h_ieqjs : i = j.succ := by
+          simp[j]
+          omega
+        have : (x1 :: xs).insertIdx i x = x1 :: (xs.insertIdx j x) := by
+          conv =>
+            lhs
+            unfold List.insertIdx
+            unfold List.modifyTailIdx
+            unfold List.modifyTailIdx.go
+          split
+          case h_1 => contradiction
+          case h_2 => contradiction
+          case h_3 x' x'' n a as heq =>
+            congr
+            . symm
+              injection heq
+            . symm
+              injection heq
+        rw [this]
+        have : ((y :: ys).eraseIdx i) = y :: (ys.eraseIdx j) := by
+          conv =>
+            lhs
+            unfold List.eraseIdx
+          split
+          case h_1 => contradiction
+          case h_2 => contradiction
+          case h_3 xs' x' a as n heq =>
+            congr
+            . symm
+              injection heq
+            . symm
+              injection heq
+        rw [this]
+        unfold List.zipWith
+        have : (List.zipWith f (xs.insertIdx j x) ys).Perm (f x (y :: ys)[i] :: List.zipWith f xs (ys.eraseIdx j)) := by
+          have : j < ys.length := by grind
+          have h2' : xs.length = ys.length - 1 := by grind
+          simp_all
+        exact calc f x1 y :: List.zipWith f (xs.insertIdx j x) ys
+          List.Perm _ (f x1 y :: f x (y :: ys)[i] :: List.zipWith f xs (ys.eraseIdx j)) := by
+            apply List.Perm.cons
+            exact this
+          List.Perm _  (f x (y :: ys)[i] :: f x1 y :: List.zipWith f xs (ys.eraseIdx j)) := by apply List.Perm.swap
 
 theorem lin_dep_from_v_is_lincomb_of_others [BEq V][LawfulBEq V][BEq F][EquivBEq F][LawfulBEq F]
         (vs: List V) (h: ∃ i1:Nat, ∃h:i1 < vs.length, ∃ ls : List F, ls.length = vs.length - 1 ∧ vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1))) :
@@ -208,11 +279,14 @@ theorem lin_dep_from_v_is_lincomb_of_others [BEq V][LawfulBEq V][BEq F][EquivBEq
   let xs'' := xs.insertIdx i1 (-1)
   have h_i' : i1 <= vs.length - 1:= by grind -- todo: grind
   have h_len'' : xs''.length = vs.length := by
-    simp[xs'', h_lsLen, h, List.length_insertIdx,h_i']
+    simp[xs'', h_lsLen, List.length_insertIdx,h_i']
     grind --todo: grind
   have h_perm : List.Perm (List.zipWith (fun x v => x • v) xs'' vs)  (List.zipWith (fun x v => x • v) xs' vs'):= by
     simp[xs'', xs', vs',v1]
-    sorry
+    have : -vs[i1] = (fun x v => x • v) (-1:F) vs[i1] := by simp
+    rw [this]
+    apply List.zipWith_insertIdx_eraseIdx_perm
+    assumption
   unfold linear_independent
   simp
   exists xs''
