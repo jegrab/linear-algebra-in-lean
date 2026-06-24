@@ -1,5 +1,6 @@
 import LinearAlgebraInLean.VectorSpace.Def
 import LinearAlgebraInLean.VectorSpace.Tactics
+import LinearAlgebraInLean.VectorSpace.Subspace
 
 namespace LA
 
@@ -111,6 +112,14 @@ def Isomorphism.invert (φ: Isomorphism V W): Isomorphism W V where
   left := φ.right
   right := φ.left
 
+@[reducible] def kernel (φ: LinearMap V W) : Subspace V := by
+  apply Subspace.mk (fun x => φ x = 0)
+  . constructor
+    exists 0
+    apply φ.zero
+  . intro u v μ
+    simp [u.property, v.property]
+
 end LinearMap
 
 namespace VectorSpace
@@ -148,6 +157,7 @@ def isomorphic.trans {V: VectorSpace F V} {W: VectorSpace F W} {Z: VectorSpace F
     simp [a.left, b.left]
   . conv => lhs; rw [<-chain.assoc]; rhs; rw [chain.assoc]
     simp [a.right, b.right]
+
 
 private abbrev isomorphic_ (F: Field F) (V W: Type) (V: VectorSpace F V) (W: VectorSpace F W) := @isomorphic F F V W V W
 
