@@ -66,7 +66,6 @@ abbrev GroupFromRight [Add G] [Neg G] [Zero G]
 
 namespace Group
 variable [G: Group G]
-
 theorem neg_unique {a b: G}: a + b = 0 -> b = -a := by
   intro h
   have := congrArg (-a + .) h
@@ -121,6 +120,12 @@ theorem neutral_unique {a e: G} : a + e = a -> e = 0 := by
 @[simp] theorem sub_sub_swap {a b c: G}: a - (b - c) = a + c - b := by
   simp
 
+@[ext] theorem ext {G H: Group G}: G.add = H.add -> G = H := by
+  sorry
+
+
+
+
 end Group
 
 abbrev Group.non_zeros (g : Group G):= {x : G // x ≠ 0}
@@ -135,6 +140,15 @@ instance : CoeSort (AbelianGroup G) (Type) where
   coe _ := G
 
 instance [g: AbelianGroup G]: Std.Commutative (α := G) (. + .) := ⟨g.comm⟩
+
+@[ext] theorem AbelianGroup.ext {G U: AbelianGroup G}: G.add = U.add -> G = U := by
+  intro h
+  cases G
+  cases U
+  congr
+  apply Group.ext
+  assumption
+
 
 abbrev zero_devisor_free (op: operation S) (z) := ∀ a b :S,  a = z ∨ b = z ↔ op a b = z
 

@@ -67,8 +67,16 @@ variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} {U: Subspace
     smul_is_smul := by simp [smul, HSMul.hSMul, SMul.smul]
   }
 
+@[ext] theorem ext (U W: Subspace V): U.pred = W.pred -> U = W := by
+  intro h
+  cases U
+  cases W
+  simp
+  constructor
+  assumption
+  -- ext
 
-
+  sorry
 
 @[reducible] def zero_subspace: Subspace V := by
   apply Subspace.mk (. = (0: V))
