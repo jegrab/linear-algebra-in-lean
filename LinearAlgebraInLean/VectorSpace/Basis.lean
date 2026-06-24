@@ -43,4 +43,4 @@ abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
       simp [lx, ly]
 
 
-def Basis (V: VectorSpace F V) (vs: List V) := ∀ x, (Span F vs).pred x ∧ VectorSpace.linear_independent F vs -- and linear independent
+def Basis (V: VectorSpace F V) (vs: List V) := Span F vs = V ∧ VectorSpace.linear_independent F vs

@@ -93,3 +93,12 @@ variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} {U: Subspace
     exists 0
   . intro ⟨u, hu⟩ ⟨v, hv⟩ μ
     simp [hu, hv]
+
+@[reducible] def cast_subspace (V: VectorSpace F V): Subspace V := by
+  apply Subspace.mk (fun _ => True)
+  . constructor
+    exists 0
+  . simp
+
+instance (V: VectorSpace F V) : CoeDep (VectorSpace F V) V (Subspace V) where
+  coe := cast_subspace V

@@ -9,9 +9,9 @@ instance FieldSpace (F: Field F): VectorSpace F F where
 
 theorem DefaultFieldBasis [F: Field F]: Basis (FieldSpace F) [1] := by
   unfold Basis
-  intro x
   constructor
-  . simp
+  . ext x
+    simp
     exists [x]
     constructor
     simp
@@ -109,9 +109,9 @@ theorem Sum.delta [G: Field G] {f: α -> G} {ls: List α} {h: n = ls.length} (j:
 
 theorem DefaultBasis [F: Field F]: Basis (TupleSpace F n) $ List.map (fun x => (Vector.zero).set x.val 1) $ List.finRange n := by
   unfold Basis
-  intro x
   constructor
-  . simp
+  . ext x
+    simp
     exists x.toList
     constructor
     . simp
