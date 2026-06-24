@@ -65,13 +65,18 @@ variable {F V} [F: Field F] [V: VectorSpace F V]
   have : μ • (0: V) + μ • 0 = μ • 0 := by simp
   apply Group.neutral_unique this
 
-@[ext] theorem ext {V W: VectorSpace F V}: V.add = W.add -> V.smul = W.smul -> V = W := by
+@[ext] theorem ext {V: Type} {V W: VectorSpace F V}: V.add = W.add -> V.smul = W.smul -> V = W := by
   intro hadd hmul
   cases V
+  rename SMul _ _ => smul1
   cases W
+  rename SMul _ _ => smul2
   congr
-  -- ext
-  all_goals sorry
+  ext
+  rw [hadd]
+  cases smul1
+  cases smul2
+  congr
 
 theorem _root_.Sum.const_vs [VectorSpace F S] {a: S}: sum (List.replicate n a) = (n: F) • a := by
   induction n with

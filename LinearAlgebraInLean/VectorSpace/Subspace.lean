@@ -70,13 +70,22 @@ variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} {U: Subspace
 @[ext] theorem ext (U W: Subspace V): U.pred = W.pred -> U = W := by
   intro h
   cases U
+  rename V -> Prop => pred1
+  rename VectorSpace _ _=> Vec1
+  rename_i add1 smul1
   cases W
-  simp
+  rename V -> Prop => pred2
+  rename VectorSpace _ _=> Vec2
+  rename_i add2 smul2
+  simp at *
   constructor
   assumption
-  -- ext
+  subst h
+  apply heq_of_eq
+  ext
+  rw [@Add.add_eq_hAdd, add1, @Add.add_eq_hAdd, add2]
+  rw [@SMul.smul_eq_hSMul, smul1, @SMul.smul_eq_hSMul, smul2]
 
-  sorry
 
 @[reducible] def zero_subspace: Subspace V := by
   apply Subspace.mk (. = (0: V))

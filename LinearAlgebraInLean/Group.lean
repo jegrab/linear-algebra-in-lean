@@ -120,8 +120,49 @@ theorem neutral_unique {a e: G} : a + e = a -> e = 0 := by
 @[simp] theorem sub_sub_swap {a b c: G}: a - (b - c) = a + c - b := by
   simp
 
-@[ext] theorem ext {G H: Group G}: G.add = H.add -> G = H := by
-  sorry
+@[ext] theorem ext {G: Type} {G H: Group G}: G.add = H.add -> G = H := by
+  intro hadd
+
+  have {a: G}: G.add a H.zero = a := by rw [hadd]; apply H.neutral_right
+  have zero_eq_zero: H.zero = G.zero := by
+    apply @Group.neutral_unique G G _ _ this
+    apply G.zero
+  have {a: G}: G.add a (H.neg a) = G.zero := by rw [hadd, <-zero_eq_zero]; apply H.inverse_right
+  have neg_eq_neg: H.neg = G.neg := by
+    ext a
+    apply @Group.neg_unique G G _ _ this
+
+  cases G
+  rename Add _ => add1
+  rename Neg _ => neg1
+  rename Zero _ => zero1
+  cases H
+  rename Add _ => add2
+  rename Neg _ => neg2
+  rename Zero _ => zero2
+  congr
+  cases add1
+  cases add2
+  congr
+
+  cases neg1
+  cases neg2
+  congr
+  simp [Neg.neg] at neg_eq_neg
+  apply Eq.symm
+  assumption
+
+  cases zero1
+  cases zero2
+  simp [Zero.zero] at zero_eq_zero
+  congr
+  apply Eq.symm
+  assumption
+
+
+
+
+
 
 
 
@@ -252,7 +293,7 @@ instance : CoeFun (GroupHom G H) (λ_ => (G -> H)) where
   coe hom := hom.hom
 
 
-def GroupHom.ext {f g: GroupHom G H}: (∀ x, f x = g x) → f = g := by
+@[ext] def GroupHom.ext {f g: GroupHom G H}: (∀ x, f x = g x) → f = g := by
   intro h
   cases f <;> cases g
   simp at *
