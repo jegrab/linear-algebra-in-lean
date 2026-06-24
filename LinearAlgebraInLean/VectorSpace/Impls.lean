@@ -17,7 +17,15 @@ theorem DefaultFieldBasis [F: Field F]: Basis (FieldSpace F) [1] := by
     simp
     simp
     simp [HSMul.hSMul, SMul.smul]
-  . sorry
+  . unfold VectorSpace.linear_independent
+    intro ls h_len sum_zero l l_in_ls
+    unfold List.zipWith at sum_zero
+    cases ls with
+    | nil => contradiction
+    | cons x xs =>
+    simp_all
+    simp [HSMul.hSMul, SMul.smul] at sum_zero
+    assumption
 
 
 
@@ -122,4 +130,22 @@ theorem DefaultBasis [F: Field F]: Basis (TupleSpace F n) $ List.map (fun x => (
     simp
     assumption
     simp
-  . sorry
+  . unfold VectorSpace.linear_independent
+    intro ls h_len sum_zero l h_l_in_ls
+    simp_all
+    rw [List.zipWith_map_right] at sum_zero
+    unfold Vector.zero at sum_zero
+    simp [Vector.ext_iff] at sum_zero
+    simp [Sum.vector_component, Vector.getElem_set] at sum_zero
+
+    have {i} : (fun x (y: Fin n) => x • if (y: Nat) = i then 1 else 0) = (fun x (y: Fin n) => (δ (y) i: F) * x) := by
+        unfold δ
+        simp [HSMul.hSMul, SMul.smul]
+        rw [Mul.mul_eq_hMul]
+
+    conv at sum_zero => pattern fun _ => _; rw [this]
+    conv at sum_zero => ext x h; lhs; rw [@Sum.delta F _ n (hj := h) (h := h_len.symm)]
+    have ⟨i, hi, hh⟩ := List.getElem_of_mem h_l_in_ls
+    rw [h_len] at hi
+    rw [<-hh]
+    apply sum_zero i hi
