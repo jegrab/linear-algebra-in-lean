@@ -103,6 +103,38 @@ theorem emptyset_is_linear_independent : @linear_independent F V F V [] := by
   unfold linear_independent
   simp
 
+theorem zero_lin_dep (ls: List V) (h: 0 ∈ ls): ¬ linear_independent F ls := by
+  let ⟨iz, hi, hzero⟩ := List.getElem_of_mem h
+  simp[linear_independent]
+  exists (List.replicate (ls.length) 0).set iz 1
+  constructor
+  simp
+  induction hlen: ls.length generalizing iz ls with
+  | zero => simp_all
+  | succ n hn =>
+  unfold List.replicate
+  cases ls; next => contradiction
+  by_cases hiz: iz = 0
+  . unfold List.set
+    unfold sum
+    simp_all
+    rw [List.zipWith_replicate_left]
+    simp
+    rw [List.map_const', Sum.const_vs]
+    unfold nat_to_r1ng
+    simp
+    apply hlen.symm
+  . cases iz
+    . contradiction
+    rw [List.set_cons_succ, List.zipWith_cons_cons]
+    simp [sum]
+    apply hn
+    apply List.mem_of_getElem
+    iterate 2 (simp at hzero; assumption)
+    simp at hlen; assumption
+
+
+
 @[simp] theorem sum_s_distr {vs: List V} {x: F} : sum (vs.map (fun v => x • v)) = x • sum vs := by -- maybe merge with Sum.sum_distr (same proof)
   induction vs with
   | nil =>
@@ -146,8 +178,9 @@ theorem List.getElem_cons_eraseIdx_perm
             (List.Perm.cons x (ih i hi'))
 
 theorem v_is_lincomb_of_others_from_lin_dep [BEq V][LawfulBEq V][BEq F][EquivBEq F][LawfulBEq F]
-        (vs: List V) (hl : ¬ @linear_independent F V F V vs) :
-        ∃ i1:Nat, ∃h:i1 < vs.length, ∃ ls : List F, ls.length = vs.length - 1 ∧ vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1)) := by
+        {vs: List V} (hl : ¬ linear_independent F vs) :
+        ∃ (i1: Nat) (h: i1 < vs.length) (ls : List F) (_: ls.length = vs.length - 1),
+        vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1)) := by
   unfold linear_independent at hl
   simp at hl
   have ⟨xs, h_xsLen, h_sumEq0, x1, h_x1InXs, h_x1Neq0⟩ := hl
@@ -167,7 +200,7 @@ theorem v_is_lincomb_of_others_from_lin_dep [BEq V][LawfulBEq V][BEq F][EquivBEq
   exists h_i1LeVs
   exists ys
 
-  constructor
+  exists ?_
   . simp[ys,<-h_xsLen]
     apply xs.length_eraseIdx_of_lt
     exact h_i1LeXs
@@ -277,8 +310,8 @@ theorem List.zipWith_insertIdx_eraseIdx_perm
           List.Perm _  (f x (y :: ys)[i] :: f x1 y :: List.zipWith f xs (ys.eraseIdx j)) := by apply List.Perm.swap
 
 theorem lin_dep_from_v_is_lincomb_of_others [BEq V][LawfulBEq V][BEq F][EquivBEq F][LawfulBEq F]
-        (vs: List V) (h: ∃ i1:Nat, ∃h:i1 < vs.length, ∃ ls : List F, ls.length = vs.length - 1 ∧ vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1))) :
-        ¬ @linear_independent F V F V vs := by
+        (vs: List V) (h: ∃ (i1:Nat) (h:i1 < vs.length) (ls : List F) (_: ls.length = vs.length - 1), vs[i1] = sum (ls.zipWith (. • .) (vs.eraseIdx i1)))
+        : ¬ linear_independent F vs := by
   have ⟨i1, h, xs, h_lsLen, h_repr⟩ := h
   let v1 := vs[i1]
   have : sum (List.zipWith (fun x v => x • v) xs (vs.eraseIdx i1)) + -v1 = 0 := by simp[v1, h_repr]

@@ -3,6 +3,8 @@ import LinearAlgebraInLean.Sum
 import LinearAlgebraInLean.VectorSpace.Subspace
 namespace LA.VectorSpace
 
+open VectorSpace
+
 variable [F: Field F] [V: VectorSpace F V]
 
 abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
@@ -44,3 +46,86 @@ abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
 
 
 def Basis (V: VectorSpace F V) (vs: List V) := Span F vs = V ∧ VectorSpace.linear_independent F vs
+
+def linear_combination (F: Field F) (v: V) (vs: List V): Prop := ∃ (μs: List F) (_: μs.length = vs.length), v = sum (List.zipWith (. • .) μs vs)
+
+theorem Basis.is_linear_combination (hb: Basis V bs) (v: V): linear_combination F v bs := by
+  unfold linear_combination
+  unfold Basis at hb
+  have hspan := hb.left
+  simp [Span] at hspan
+  have hspan := hspan.left
+  rw [funext_iff] at hspan
+  simp at hspan
+  have ⟨μ, hlen, hm⟩ := hspan v
+  exists μ, hlen
+
+theorem linear_independent.combination_dependent {n: Nat} (vs xs: List V) {hvlen : vs.length = n} {hxlen: xs.length = n + 1}
+  (h: ∀ x ∈ xs, linear_combination F x vs)
+  : ¬ VectorSpace.linear_independent F xs := by
+  induction n generalizing xs vs with
+  | zero =>
+    simp_all
+    cases xs with
+      | nil => contradiction
+      | cons x xs =>
+        simp_all
+        unfold linear_combination at h
+        simp_all
+        apply VectorSpace.zero_lin_dep
+        simp
+  | succ n hn =>
+  cases vs with
+  | nil => contradiction
+  | cons v vs =>
+  cases xs with
+  | nil => contradiction
+  | cons x xs =>
+  simp_all
+  have ⟨hv, h⟩ := h
+
+  sorry
+
+theorem append_lin_dep (vs xs: List V) (h: ¬ VectorSpace.linear_independent F vs)
+  : ¬ VectorSpace.linear_independent F (vs ++ xs) := by
+  unfold VectorSpace.linear_independent at *
+  simp at *
+  obtain ⟨μs, h_len, h_sum_zero, x_nz, hx_μ, hxnz⟩ := h
+  exists μs ++ List.replicate xs.length 0
+  constructor
+  simp [h_len]
+  constructor
+  . rw [List.zipWith_append, <-Sum.split, h_sum_zero, List.zipWith_replicate_left]
+    simp [List.map_const', Sum.const_vs]
+    rfl
+    assumption
+  exists x_nz
+  constructor
+  simp [hx_μ]
+  assumption
+
+theorem Basis.equal_size: ∀ (b1 b2: List V) (_: Basis V b1) (_: Basis V b2), b1.length = b2.length := by
+  suffices ∀ (b1 b2: List V) (hb1: Basis V b1) (hb2: Basis V b2), b1.length <= b2.length by
+    intros
+    apply Nat.eq_iff_le_and_ge.mpr
+    constructor <;> apply this <;> assumption
+  intro b1 b2 hb1 hb2
+  unfold Basis at *
+  false_or_by_contra
+  rename_i hlt
+  simp at hlt
+  suffices ¬ VectorSpace.linear_independent F b1 from this hb1.right
+  let b1' := b1.splitAt (b2.length + 1)
+  have b1_len : b1'.1.length = b2.length + 1 := by
+    unfold b1'
+    simp [List.splitAt_eq, Nat.min_eq_left (Nat.succ_le_of_lt hlt)]
+  have : b1 = b1'.1 ++ b1'.2 := by simp [b1']
+  rw [this]
+  apply append_lin_dep
+  apply linear_independent.combination_dependent b2 b1'.fst
+  intros
+  apply Basis.is_linear_combination
+  assumption
+  apply b2.length
+  rfl
+  assumption

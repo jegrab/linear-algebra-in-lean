@@ -6,6 +6,24 @@ def sum [Add t] [Zero t] (indices: List t) : t :=
   | [] => 0
   | i::is => i + sum is
 
+
+theorem List.zipWith_replicate_right (_: n = xs.length): List.zipWith f xs (List.replicate n v) = List.map (f . v) xs := by
+  induction xs generalizing n with
+  | nil => simp
+  | cons a ax h =>
+  cases n
+  contradiction
+  rename Nat => n
+  rw [List.replicate_succ, List.zipWith_cons_cons, h, List.map_cons]
+  rename_i hlen
+  simp at hlen
+  assumption
+
+theorem List.zipWith_replicate_left (_: n = xs.length): List.zipWith f (List.replicate n v) xs = List.map (f v) xs := by
+  rw[List.zipWith_comm]
+  apply List.zipWith_replicate_right
+  assumption
+
 namespace Sum
 
 @[simp] theorem empty [Zero T] [Add T]: sum [] = (0: T) := by
