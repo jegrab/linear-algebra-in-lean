@@ -5,7 +5,7 @@ namespace LA
 
 namespace QuotientSpace
 
-def relation (V: VectorSpace F V) (U : Subspace V) (a: V) (b: V) : Prop := a - b ∈ U
+def relation (V: VectorSpace F V) (U : Subspace V) (u v : V) : Prop := u - v ∈ U
 
 theorem relation_is_eqrel {V: VectorSpace F V} {U : Subspace V} : Equivalence (relation V U) := by
   constructor
@@ -30,10 +30,109 @@ theorem relation_is_eqrel {V: VectorSpace F V} {U : Subspace V} : Equivalence (r
     simp
     assumption
 
+
+def rel (V: VectorSpace F V) (U : Subspace V) : Setoid V := Setoid.mk (relation V U) relation_is_eqrel
+
 end QuotientSpace
 
-structure PreQuotientSpace (V: VectorSpace F V) (U : Subspace V) where
-  rel := QuotientSpace.relation V U
+def QuotientSpace (V: VectorSpace F V) (U : Subspace V) : Type := Quotient (QuotientSpace.rel V U)
 
-attribute[simp] Subspace.add_is_add
-attribute[instance] Subspace.toVectorSpace
+infixl:60 " / " => QuotientSpace
+
+namespace QuotientSpace
+
+def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V U)
+
+@[reducible] def toVectorSpace {V: VectorSpace F V} {U : Subspace V} (q : V / U): VectorSpace F (V / U) :=
+  let smul(μ: F) : V / U ->  V / U := Quotient.lift (fun x => mk (μ • x)) <| by
+    intro a b hab
+    simp
+    unfold mk
+    apply Quotient.sound
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid] at hab
+    unfold Setoid.r rel at hab
+    unfold relation at hab
+    simp at hab
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid]
+    unfold Setoid.r rel
+    unfold relation
+    simp
+    rw [<-VectorSpace.smul_minus_right]
+    rw [<-VectorSpace.s_distr_right]
+    exact Subspace.closed_smul μ hab
+  let qadd : V / U -> V / U -> V / U := Quotient.lift₂ (fun u v => mk (u + v)) <| by
+    intro a1 b1 a2 b2 ha hb
+    simp
+    unfold mk
+    apply Quotient.sound
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid] at ha
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid] at hb
+    unfold Setoid.r rel at ha
+    unfold Setoid.r rel at hb
+    unfold relation at ha
+    unfold relation at hb
+    simp at ha
+    simp at hb
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid]
+    unfold Setoid.r rel
+    unfold relation
+    simp
+    rw [<-Group.assoc b1]
+    rw [AbelianGroup.comm b1]
+    rw [Group.assoc]
+    rw [<-Group.assoc]
+    apply Subspace.closed_add
+    assumption
+    assumption
+  let neg : V / U -> V / U := Quotient.lift (fun u => mk (-u)) <| by
+    intro a b hab
+    simp
+    unfold mk
+    apply Quotient.sound
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid] at hab
+    unfold Setoid.r rel at hab
+    unfold relation at hab
+    simp at hab
+    simp[HasEquiv.Equiv, instHasEquivOfSetoid]
+    unfold Setoid.r rel
+    unfold relation
+    simp
+    let z := Subspace.closed (-1) hab (Subspace.zero_in_subspace U)
+    simp at z
+    assumption
+  {
+    add := qadd
+    smul := smul
+    zero := mk 0
+    neg := neg
+    assoc := by
+      intro a b c
+      vector_space_refold[qadd]
+      induction a using Quotient.ind
+      induction b using Quotient.ind
+      induction c using Quotient.ind
+      unfold Quotient.lift₂
+      apply Quotient.sound
+      rw [V.assoc]
+      apply relation_is_eqrel.refl
+    neutral_right := by
+      intro a
+      vector_space_refold[qadd]
+      induction a using Quotient.ind
+      unfold Quotient.lift₂
+      apply Quotient.sound
+      rw [V.neutral_right]
+      apply relation_is_eqrel.refl
+    neutral_left := by
+      sorry
+    inverse_left := by sorry
+    inverse_right := by sorry
+    comm := by sorry
+    one_mul := by sorry
+    s_assoc := by sorry
+    s_distr_left := by sorry
+    s_distr_right := by sorry
+  }
+
+
+end QuotientSpace

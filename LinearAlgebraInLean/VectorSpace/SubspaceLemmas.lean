@@ -102,3 +102,13 @@ theorem closed {U : Subspace V} {u v : V} (μ: F) (hu: u ∈ U) (hv: v ∈ U) : 
   rw [<-Subspace.val_is_embed] at a
   simp at a
   exact a
+
+theorem closed_smul {U : Subspace V} {u: V} (μ: F) (hu: u ∈ U) : (μ • u ∈ U) := by
+  let y := closed μ hu (Subspace.zero_in_subspace U)
+  simp at y
+  assumption
+
+theorem closed_add {U : Subspace V} {u v: V} (hu: u ∈ U) (hv: v ∈ U) : (u + v ∈ U) := by
+  let y := closed 1 hu hv
+  simp at y
+  assumption
