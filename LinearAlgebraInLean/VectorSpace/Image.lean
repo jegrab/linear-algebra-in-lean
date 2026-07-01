@@ -35,4 +35,13 @@ theorem surjective_from_whole_kernel {Φ: LinearMap V W} (h: image Φ = W): Func
 
 
 theorem same_image_from_in_kernel {a b : V} {Φ: LinearMap V W} (h: a-b ∈ Kernel.kernel Φ): Φ a = Φ b := by
-  sorry
+  simp [Membership.mem] at h
+  let := Group.neg_unique_left h
+  simp [this]
+
+theorem in_kernel_from_same_image {a b : V} {Φ: LinearMap V W} (h: Φ a = Φ b) : a-b ∈ Kernel.kernel Φ := by
+  simp[Membership.mem]
+  rw [h]
+  simp
+
+-- todo: Hilfssatz 9.13 (II)
