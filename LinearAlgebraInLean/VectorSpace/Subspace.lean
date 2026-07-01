@@ -102,3 +102,6 @@ variable  {F V} [F: Field F] [V: VectorSpace F V] {pred: V -> Prop} {U: Subspace
 
 instance (V: VectorSpace F V) : CoeDep (VectorSpace F V) V (Subspace V) where
   coe := cast_subspace V
+
+instance : Membership V (Subspace V) where
+  mem := Subspace.pred

@@ -30,3 +30,7 @@ theorem injective_from_zero_kernel {Φ: LinearMap V W} (h: kernel Φ = Subspace.
   simp at this
   let this := Group.neg_unique_left this
   simp[this]
+
+@[reducible] def pre_image (Φ: LinearMap V W) (w: W) := {x : V // Φ.hom x = w}
+
+theorem kernel_is_pre_image_of_zero {Φ: LinearMap V W} : pre_image Φ 0 = kernel Φ := by simp
