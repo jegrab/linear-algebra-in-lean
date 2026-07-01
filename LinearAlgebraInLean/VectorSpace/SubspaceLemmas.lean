@@ -13,7 +13,11 @@ def embed (U: Subspace V): LinearMap U.toVectorSpace V :=
     scalar := U.smul_is_smul
   }
 
-def zero_in_subspace (U: Subspace V): U.pred 0 := by
+theorem val_is_embed (U: Subspace V) (a: U): a.val = U.embed a := by
+  unfold embed
+  simp
+
+def zero_in_subspace (U: Subspace V): 0 ∈ U := by
   have h := (0: U).property
   have : (0: U) = (0: V) := by
     rw [<-U.embed.zero]
