@@ -85,3 +85,20 @@ theorem eq_zero_from_pred {U : Subspace V} (h: ∀x: V, U.pred x -> x = 0): U = 
     intro hx
     rw[hx]
     exact zero_in_subspace U
+
+
+theorem closed {U : Subspace V} {u v : V} (μ: F) (hu: u ∈ U) (hv: v ∈ U) : (μ • u + v∈ U) := by
+  simp [Membership.mem] at hu
+  simp [Membership.mem] at hv
+  simp[Membership.mem]
+  let u' := Subtype.mk u hu
+  let v' := Subtype.mk v hv
+  let r' := μ • u' + v'
+  have a := r'.property
+  unfold r' u' v' at a
+  rw [Subspace.val_is_embed] at a
+  simp at a
+  rw [<-Subspace.val_is_embed] at a
+  rw [<-Subspace.val_is_embed] at a
+  simp at a
+  exact a
