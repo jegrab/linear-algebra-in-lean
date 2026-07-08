@@ -43,7 +43,7 @@ namespace QuotientSpace
 
 def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V U)
 
-@[reducible] def toVectorSpace {V: VectorSpace F V} {U : Subspace V} (q : V / U): VectorSpace F (V / U) :=
+@[reducible, instance] def toVectorSpace {V: VectorSpace F V} {U : Subspace V} (q : V / U): VectorSpace F (V / U) :=
   let smul(μ: F) : V / U ->  V / U := Quotient.lift (fun x => mk (μ • x)) <| by
     intro a b hab
     simp
