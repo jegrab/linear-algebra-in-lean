@@ -42,7 +42,7 @@ variable {F V} [F: Field F] [V: VectorSpace F V]
     _ = 0 := by simp
   apply Group.neg_unique this
 
-@[simp] theorem zero_div_free (r : F) (v : V) (h: r • v = 0) : r = 0 ∨ v = 0 := by
+@[simp] theorem zero_div_free {r : F} {v : V} (h: r • v = 0) : r = 0 ∨ v = 0 := by
   by_cases hr: r = 0
   . left
     assumption

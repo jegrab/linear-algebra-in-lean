@@ -47,7 +47,7 @@ abbrev Span (F: Field F) [V: VectorSpace F V] (vs: List V): Subspace V := by
 
 def Basis (V: VectorSpace F V) (vs: List V) := Span F vs = V ∧ VectorSpace.linear_independent F vs
 
-def linear_combination (F: Field F) (v: V) (vs: List V): Prop := ∃ (μs: List F) (_: μs.length = vs.length), v = sum (List.zipWith (. • .) μs vs)
+def linear_combination (F: Field F) [V: VectorSpace F V] (v: V) (vs: List V): Prop := ∃ (μs: List F) (_: μs.length = vs.length), v = sum (List.zipWith (. • .) μs vs)
 
 theorem Basis.is_linear_combination (hb: Basis V bs) (v: V): linear_combination F v bs := by
   unfold linear_combination
