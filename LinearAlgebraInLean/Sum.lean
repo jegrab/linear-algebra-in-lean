@@ -6,6 +6,13 @@ def sum [Add t] [Zero t] (indices: List t) : t :=
   | [] => 0
   | i::is => i + sum is
 
+notation (priority := low) "∑ " xs:65 => sum xs
+notation (priority := low) "∑ " "𝕏 " " ∈ " xs " : "  f " 𝕏" => sum (List.map f xs)
+notation "∑ " x:100 " ∈ " xs:1 " : " expr:65 => sum (List.map (fun x => expr) xs)
+notation "∑ "  x:100 ", " y:100 " ∈ " xs ", " ys " : " expr:65 => sum (List.zipWith (fun x y => expr) xs ys)
+
+#check (∑ x ∈ [0,1]: x * x + x = 0)
+
 
 theorem List.zipWith_replicate_right (_: n = xs.length): List.zipWith f xs (List.replicate n v) = List.map (f . v) xs := by
   induction xs generalizing n with
@@ -127,7 +134,7 @@ theorem push [S: AbelianGroup S] {a b: S}: sum ((a + b) :: ls) = sum (a :: b :: 
   rw [<-S.assoc]
 
 
-theorem unzip [AbelianGroup S] {ls: List α} {f g: α -> S}: sum (List.map (fun x => f x + g x) ls) = sum (List.map f ls) + sum (List.map g ls) := by
+theorem unzip [AbelianGroup S] {ls: List α} {f g: α -> S}: sum (List.map (fun x => f x + g x) ls) = sum (List.map (fun x => f x) ls) + sum (List.map (fun x => g x) ls) := by
   induction ls with
   | nil => simp
   | cons x xs ih =>
@@ -153,7 +160,7 @@ theorem const [R1ng S] {a: S}: sum (List.replicate n a) = n * a := by
       rw [h, One.one_is_ofNat]
       simp
 
-theorem neg [S: AbelianGroup S] {ls: List S}: sum (List.map S.neg ls) = - sum ls := by
+theorem neg [S: AbelianGroup S] {ls: List S}: sum (List.map (fun x => -x) ls) = - sum ls := by
   induction ls with
     | nil => simp [sum]
     | cons x ll ih =>
