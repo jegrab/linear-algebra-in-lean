@@ -12,15 +12,6 @@ macro_rules
 
 -- todo refold tactic
 
-elab "my_intro" : tactic => do
-  let goal ← getMainGoal
-  let (_, newGoal) ← goal.intro `h
-  replaceMainGoal [newGoal]
--- Now my_intro works like intro
-example : P → P := by
-  my_intro
-  assumption
-
 def unfoldForall (e: Expr) : TacticM (List Name) := do
   match e with
   | Expr.forallE name binderType body info  =>
@@ -46,12 +37,3 @@ elab "unfold_quotient"  : tactic => do
     evalTactic (<- `(tactic | induction $id:ident using Quotient.ind))
   evalTactic (<- `(tactic | try unfold Quotient.lift₂))
   evalTactic (<- `(tactic | try unfold Quotient.lift))
-
-
-elab "my_intro" : tactic => do
-  let goal ← getMainGoal
-  let (_, newGoal) ← goal.intro `h
-  replaceMainGoal [newGoal]
--- Now my_intro works like intro
-example : P → P := by
-  sorry
