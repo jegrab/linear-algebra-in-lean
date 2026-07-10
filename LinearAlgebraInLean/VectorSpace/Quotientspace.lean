@@ -106,32 +106,58 @@ def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V 
     zero := mk 0
     neg := neg
     assoc := by
-      intro a b c
-      vector_space_refold[qadd]
-      induction a using Quotient.ind
-      induction b using Quotient.ind
-      induction c using Quotient.ind
-      unfold Quotient.lift₂
+      unfold_quotient
       apply Quotient.sound
       rw [V.assoc]
       apply relation_is_eqrel.refl
     neutral_right := by
-      intro a
-      vector_space_refold[qadd]
-      induction a using Quotient.ind
-      unfold Quotient.lift₂
+      unfold_quotient
       apply Quotient.sound
       rw [V.neutral_right]
       apply relation_is_eqrel.refl
     neutral_left := by
-      sorry
-    inverse_left := by sorry
-    inverse_right := by sorry
-    comm := by sorry
-    one_mul := by sorry
-    s_assoc := by sorry
-    s_distr_left := by sorry
-    s_distr_right := by sorry
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.neutral_left]
+      apply relation_is_eqrel.refl
+    inverse_left := by
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.inverse_left]
+      apply relation_is_eqrel.refl
+    inverse_right := by
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.inverse_right]
+      apply relation_is_eqrel.refl
+    comm := by
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.comm]
+      apply relation_is_eqrel.refl
+    one_mul := by
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.one_mul]
+      apply relation_is_eqrel.refl
+    s_assoc := by
+      intro r s
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.s_assoc]
+      apply relation_is_eqrel.refl
+    s_distr_left := by
+      intro r s
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.s_distr_left]
+      apply relation_is_eqrel.refl
+    s_distr_right := by
+      intro r
+      unfold_quotient
+      apply Quotient.sound
+      rw [V.s_distr_right]
+      apply relation_is_eqrel.refl
   }
 
 
