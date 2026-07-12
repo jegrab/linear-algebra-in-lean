@@ -35,16 +35,17 @@ def rel (V: VectorSpace F V) (U : Subspace V) : Setoid V := Setoid.mk (relation 
 
 end QuotientSpace
 
-def QuotientSpace (V: VectorSpace F V) (U : Subspace V) : Type := Quotient (QuotientSpace.rel V U)
+abbrev QuotientSpaceType (V: VectorSpace F V) (U : Subspace V) : Type := Quotient (QuotientSpace.rel V U)
 
-infixl:60 " / " => QuotientSpace
+
 
 namespace QuotientSpace
 
-def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V U)
+def mk {V: VectorSpace F V} {U : Subspace V} : V -> QuotientSpaceType V U := Quotient.mk (rel V U)
 
-@[reducible, instance] def toVectorSpace {V: VectorSpace F V} {U : Subspace V} (q : V / U): VectorSpace F (V / U) :=
-  let smul(μ: F) : V / U ->  V / U := Quotient.lift (fun x => mk (μ • x)) <| by
+
+instance QuotientSpace (V: VectorSpace F V) (U : Subspace V) : VectorSpace F (QuotientSpaceType V U) :=
+  let smul(μ: F) : QuotientSpaceType V U ->  QuotientSpaceType V U := Quotient.lift (fun x => mk (μ • x)) <| by
     intro a b hab
     simp
     unfold mk
@@ -60,7 +61,7 @@ def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V 
     rw [<-VectorSpace.smul_minus_right]
     rw [<-VectorSpace.s_distr_right]
     exact Subspace.closed_smul μ hab
-  let qadd : V / U -> V / U -> V / U := Quotient.lift₂ (fun u v => mk (u + v)) <| by
+  let qadd : QuotientSpaceType V U -> QuotientSpaceType V U -> QuotientSpaceType V U := Quotient.lift₂ (fun u v => mk (u + v)) <| by
     intro a1 b1 a2 b2 ha hb
     simp
     unfold mk
@@ -84,7 +85,7 @@ def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V 
     apply Subspace.closed_add
     assumption
     assumption
-  let neg : V / U -> V / U := Quotient.lift (fun u => mk (-u)) <| by
+  let neg : QuotientSpaceType V U -> QuotientSpaceType V U := Quotient.lift (fun u => mk (-u)) <| by
     intro a b hab
     simp
     unfold mk
@@ -160,5 +161,10 @@ def mk {V: VectorSpace F V} {U : Subspace V} : V -> V / U := Quotient.mk (rel V 
       apply relation_is_eqrel.refl
   }
 
+infixl:60 " / " => QuotientSpace
+
+def π {V: VectorSpace F V} {U : Subspace V} : LinearMap.Hom V (V / U) := LinearMap.mk (Quotient.mk (rel V U)) <| by
+  intro v u μ
+  rfl
 
 end QuotientSpace

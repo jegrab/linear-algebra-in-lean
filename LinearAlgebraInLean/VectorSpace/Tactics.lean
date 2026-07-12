@@ -14,21 +14,18 @@ macro_rules
 
 def unfoldForall (e: Expr) : TacticM (List Name) := do
   match e with
-  | Expr.forallE name binderType body info  =>
+  | Expr.forallE name _ body _  =>
     let goal <- getMainGoal
     let (_, newGoal) ← goal.intro name
-    logInfo m!"inForall name {name}"
     replaceMainGoal [newGoal]
     let names <- unfoldForall body
     return name :: names
   | _ =>
-    logInfo m!"other"
     return []
 
 elab "unfold_quotient"  : tactic => do
   let goal <- getMainGoal
   let goalType ← goal.getType
-  logInfo m!"Goal: {goalType}"
   let names <- unfoldForall goalType
   evalTactic (<-`(tactic | vector_space_refold))
 
