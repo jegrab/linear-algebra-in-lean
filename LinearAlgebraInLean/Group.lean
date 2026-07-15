@@ -31,7 +31,7 @@ class Group (G: Type u) extends Add G, Neg G, Zero G where
 instance [Group G] : Sub G where
   sub a b := a + (-b)
 
-instance: CoeSort (Group G) (Type) where
+instance: CoeSort (Group G) (Type u) where
   coe _ := G
 
 instance [g: Group G]: Std.Associative (α := G) (. + .) := ⟨g.assoc⟩

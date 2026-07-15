@@ -28,12 +28,9 @@ def Even (i: Int) := ∃k: Int, 2 * k = i
 
 instance EvenIntGroup : AbelianGroup (Subtype Even) := by
   apply AbelianSubGroup
-  · exact {
-    default := by
-      exists 0
-      unfold Even
-      exists 0
-  }
+  · exists 0
+    unfold Even
+    exists 0
   · intro ⟨a, ⟨x, hx⟩⟩ ⟨b,⟨y, hy⟩⟩
     unfold Even
     simp
