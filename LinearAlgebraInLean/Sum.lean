@@ -150,6 +150,15 @@ theorem unzip [AbelianGroup S] {ls: List α} {f g: α -> S}: sum (List.map (fun 
     congr 1
     simp [ih]
 
+theorem zeros [ Group G] : ∑ List.replicate n (0: G) = 0 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+  rw [List.replicate_succ]
+  unfold sum
+  rw [ih]
+  simp
+
 theorem const [R1ng S] {a: S}: sum (List.replicate n a) = n * a := by
   induction n with
     | zero => simp [nat_to_r1ng]
@@ -178,7 +187,19 @@ theorem vector_component [Field F] {h: i < n} {ls: List $ Vector F n}: (sum ls)[
     congr
 
 
+theorem flatten [Group β] {f: α -> List β}: ∑ x ∈ xs : ∑ f x = ∑ List.flatMap f xs := by
+  induction xs with
+  | nil => simp
+  | cons x xs ih =>
+  simp [sum, <- split, ih]
 
+
+theorem sum_swap [AbelianGroup γ] {f: α -> β -> γ}: ∑ x ∈ xs: ∑ y ∈ ys: f x y = ∑ y ∈ ys: ∑ x ∈ xs: f x y := by
+  induction xs generalizing ys with
+  | nil => simp [List.map_const', Sum.zeros]
+  | cons x xs ih =>
+  dsimp [Sum.split, sum]
+  rw [ih, Sum.unzip]
 
 
 end Sum
