@@ -129,3 +129,38 @@ theorem Basis.equal_size: ∀ (b1 b2: List V) (_: Basis V b1) (_: Basis V b2), b
   apply b2.length
   rfl
   assumption
+
+
+
+theorem exists_list {xs: List α} (h: ∀ x ∈ xs, ∃y: β, x = f y ) : ∃ ys: List β, xs = List.map f ys := by
+
+  sorry
+
+theorem exists_pair {p: (a: α) -> β a -> Prop }: (∃ (a: α) (b: β a), p a b) = ∃ (pair: PSigma β), p pair.1 pair.2 := by
+    ext
+    constructor
+    . intro ⟨a, b, c⟩
+      exact ⟨⟨a,b⟩, c⟩
+    . intro ⟨⟨a,b⟩,c⟩
+      exact ⟨a,b,c⟩
+
+theorem combinations (bs: List V) (vs: List V)
+  (h: ∀ v ∈ vs, ∃s : List F, linear_combination F v bs) (h_end: linear_combination F x vs)
+  : linear_combination F x bs := by
+
+  unfold linear_combination at *
+
+  have ⟨μ_e, h_len, x_e⟩ := h_end
+  conv at h => ext; ext; rw [exists_pair];  rw [exists_pair]
+
+  have ⟨ls,eq⟩ := exists_list h
+  rw [eq] at h_end
+  conv at h_end => rhs; ext; rhs; ext; rhs; rw [List.zipWith_map_right]; rhs; arg 1;ext _ _; rw[ <-Sum.scalar]
+  conv at h_end => rhs; ext; rhs; ext; rhs; rw [<-List.map_uncurry_zip_eq_zipWith]; unfold Function.uncurry; simp; rhs; lhs; ext; rw[<-List.map_uncurry_zip_eq_zipWith]; unfold Function.uncurry; simp
+  -- conv at h_end => rhs; ext; rhs; ext; rhs; rw [Sum.sum_swap]
+
+
+
+  -- have vs := vs.attach.map (fun v: Subtype (. ∈ vs) => PLift.up $ PSigma.mk v (h v v.property))
+
+  sorry
