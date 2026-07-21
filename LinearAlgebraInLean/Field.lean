@@ -61,8 +61,12 @@ instance [g: CommutativeRing G]: Std.Commutative (α := G) (. * .) := ⟨g.mul_c
 
 class Field (R : Type) extends CommutativeRing R, R1ng R, Inv (Group.non_zeros toGroup) where
   mul_inverse_left: ∀ {a}, (h: a ≠ 0) -> (⟨a,h⟩: (Group.non_zeros toGroup))⁻¹ * a = 1
-  mul_inverse_right: ∀ {a}, (h: a ≠ 0) -> (a:R) * (⟨a,h⟩:(Group.non_zeros toGroup))⁻¹ = 1
   one_is_not_zero : (1: R) ≠ 0
+
+theorem Field.mul_inverse_right [F: Field R]: ∀ {a: R}, (h: a ≠ 0) -> (a:R) * (⟨a,h⟩: (Group.non_zeros F.toGroup))⁻¹ = 1 := by
+  intros
+  rw [CommutativeRing.mul_comm]
+  apply F.mul_inverse_left
 
 attribute[simp] Field.mul_inverse_left Field.mul_inverse_right Field.one_is_not_zero
 

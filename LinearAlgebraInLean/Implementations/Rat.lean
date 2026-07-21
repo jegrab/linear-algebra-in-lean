@@ -133,5 +133,4 @@ instance ℚ: Field Rat :=
       have := a.inv_zero_iff_zero.mp h
       contradiction
     mul_inverse_left := Rat.inv_mul_cancel _
-    mul_inverse_right := Rat.mul_inv_cancel _
   }
