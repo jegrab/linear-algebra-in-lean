@@ -8,7 +8,7 @@
 - Default values in structures cannot be assumed to not be overwritten, even if they are not. Thus, if you want to use them for syntactic sugar, it often helps to also provide a theorem that they have their expected value (with a default proof.)
 - Type classes and theirs search algorithm are very sophisticated. Knowing the right options to set (i.e. outputParam) can make the compiler behave as wanted.
 - `CoeSort` is nice
-- Implicit arguments are dangerous, if they sometimes are not implicit (but a global "variable)
+- Implicit arguments are dangerous, if they sometimes are not implicit (but a global "variable")
 - Inheritance and type classes for each operation (inv etc.) allows using symbols directly in definitions and makes everything clean
 - Default values in type classes are only compile checked at instantiation.
 - It is best to use the actual notation (i.e. +, *) on theorems directly to apply them. Thus, using them in the definition of fields is desired. This may require defining them stepwise (first the operation, then in another class the axioms). It now also makes sense why the mathlib has separate classes for and mul groups, as they are tightly tied to notation. It may still be possible to have multiple different groups on the same set (if that is even mathematically possible) due to multiple instantiation of the same class. We may even want to just use + syntax i groups, as that is what is wanted for fields and vector spaces, and having a different underlying syntax makes for the additive group makes the field awkward to handle.
@@ -18,3 +18,4 @@ Custom tactics are really powerful here, allowing one to automate this process. 
 - It's not that easy to do simp rules right that they are not annoying but actually make things more simple. This may require to build a "hull" of theorems, e.g. if x - y is simpler than x + -y, we also want distributivity for a * (x - y).
 - Lean is not a very stable language: Just adding some simp rules can easily break many proofs. Fixing them afterward is not that easy if they are not easy to read. Further, just importing modules (i.e. parts of mathlib) can again break proofs (because it probably introduces its own simp rules). As a consequence, proofers should use almighty simp rules sparingly, and maybe use dsimp, (d)simp only if sufficient instead. Further, making things simp rules should be a conscious decision, as this creates implicit dependencies. 
 - Lists can be tedious to work with. Mathlib may help here as there are further lemmas. In general, making things formal on sums is a bit tedious. In practice people hand wave a log of obvious facts here. Sums over lists are probably better than with an additional mapping function.
+- 
