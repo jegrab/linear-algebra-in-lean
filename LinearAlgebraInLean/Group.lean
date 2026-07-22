@@ -12,7 +12,7 @@ theorem unique_neutral (ha : neutral_pred op a) (hb : neutral_pred op b) : a = b
 abbrev operation (G: Type u): Type u:= G -> G -> G
 
 
-syntax  "group_refold" (" [" Lean.Parser.Tactic.simpLemma,*,? "]")? : tactic
+syntax "group_refold" (" [" Lean.Parser.Tactic.simpLemma,*,? "]")? : tactic
 macro_rules
   | `(tactic|group_refold [$lma,*]) => `(tactic|
       dsimp [HAdd.hAdd, Add.add, OfNat.ofNat, Neg.neg, Zero.zero, $lma,*];
