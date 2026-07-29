@@ -107,7 +107,13 @@ instance QuotientSpace (V: VectorSpace F V) (U : Subspace V) : VectorSpace F (Qu
     zero := mk 0
     neg := neg
     assoc := by
-      unfold_quotient
+      intro a
+      intro b
+      intro c
+      vector_space_refold
+      induction a using Quotient.ind
+      induction b using Quotient.ind
+      induction c using Quotient.ind
       apply Quotient.sound
       rw [V.assoc]
       apply relation_is_eqrel.refl

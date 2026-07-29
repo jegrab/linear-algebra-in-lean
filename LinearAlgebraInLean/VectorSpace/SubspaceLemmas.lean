@@ -86,7 +86,7 @@ theorem eq_zero_from_pred {U : Subspace V} (h: ∀x: V, U.pred x -> x = 0): U = 
     rw[hx]
     exact zero_in_subspace U
 
-
+  
 theorem closed {U : Subspace V} {u v : V} (μ: F) (hu: u ∈ U) (hv: v ∈ U) : (μ • u + v∈ U) := by
   simp [Membership.mem] at hu
   simp [Membership.mem] at hv

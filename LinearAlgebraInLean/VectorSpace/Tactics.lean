@@ -28,7 +28,6 @@ elab "unfold_quotient"  : tactic => do
   let goalType ← goal.getType
   let names <- unfoldForall goalType
   evalTactic (<-`(tactic | vector_space_refold))
-
   for n in names do
     let id : TSyntax `ident := mkIdent n
     evalTactic (<- `(tactic | induction $id:ident using Quotient.ind))
