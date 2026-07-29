@@ -65,9 +65,3 @@ theorem originalIsInduedAndProjection (φ: LinearMap V W) : φ = (InducedMap φ)
   intro x
   simp [chain, Function.comp]
   rfl
-
-theorem inducedMapIsSurjective {Φ: LinearMap V W} (h: Function.Surjective Φ) : Function.Surjective (InducedMap Φ) := by
-  unfold Function.Surjective x
-  intro b
-  have ⟨a,ha⟩ := h b
-  exists QuotientSpace.π a
